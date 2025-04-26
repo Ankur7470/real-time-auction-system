@@ -1,0 +1,71 @@
+#server:
+#  port: 8081
+#
+#spring:
+#  application:
+#    name: api-gateway
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: auth-service
+#          uri: lb://AUTH-SERVICE
+#          predicates:
+#            - Path=/api/auth/**
+#          filters:
+#            - StripPrefix=1
+#            - AuthenticationFilter
+#
+#        - id: auction-service
+#          uri: lb://AUCTION-SERVICE
+#          predicates:
+#            - Path=/api/auctions/**
+#          filters:
+#            - StripPrefix=1
+#            - AuthenticationFilter
+#
+#        - id: bidding-service
+#          uri: lb://BIDDING-SERVICE
+#          predicates:
+#            - Path=/api/bids/**
+#          filters:
+#            - StripPrefix=1
+#            - AuthenticationFilter
+#
+#        - id: notification-service-ws
+#          uri: lb://notification-service
+#          predicates:
+#            - Path=/api/ws/**
+#          filters:
+#            - StripPrefix=1
+#            - AuthenticationFilter
+#
+#        - id: notification-service
+#          uri: lb://notification-service
+#          predicates:
+#            - Path=/api/notifications/**
+#          filters:
+#            - StripPrefix=1
+#            - AuthenticationFilter
+#
+#      discovery:
+#        locator:
+#          enabled: true
+##          lower-case-service-id: true
+##
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+#    register-with-eureka: true
+#    fetch-registry: true
+#  instance:
+#    preferIpAddress: true
+#
+#jwt:
+#  secret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+#
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: DEBUG
+#    org.springframework.security: DEBUG
+#    reactor.netty: DEBUG
