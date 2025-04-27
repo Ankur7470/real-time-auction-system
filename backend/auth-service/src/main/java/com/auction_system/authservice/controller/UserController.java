@@ -1,5 +1,6 @@
 package com.auction_system.authservice.controller;
 
+import com.auction_system.authservice.model.User;
 import com.auction_system.authservice.payload.UserDto;
 import com.auction_system.authservice.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/auth/users")
 @Slf4j
 public class UserController {
 
@@ -21,9 +22,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(@RequestHeader("X-User-ID") Long userId) {
-        log.info("Fetching current user with id: {}", userId);
-        return ResponseEntity.ok(userService.getUserById(userId));
-    }
+//    @GetMapping("/me")
+//    public ResponseEntity<User> getCurrentUser() {
+//        log.info("Fetching current user with id: {}", userId);
+//        return ResponseEntity.ok(userService.getAuthenticatedUser());
+//    }
+
+
 }

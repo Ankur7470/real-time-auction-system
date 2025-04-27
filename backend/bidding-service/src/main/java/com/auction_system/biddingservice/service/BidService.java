@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,36 @@ public class BidService {
         return convertToDTO(bid);
     }
 
+//    @Transactional
+//    public BidDTO createBid(BidDTO bidDTO, Long userId) {
+//        log.info("Creating bid for auction: {} by user: {}", bidDTO.getAuctionId(), userId);
+//
+//        Map<String, Object> bidRequest = new HashMap<>();
+//        bidRequest.put("amount", bidDTO.getAmount());
+//
+//        AuctionDTO updatedAuction = auctionClient.updateBid(
+//                    bidDTO.getAuctionId(),
+//                    userId,
+//                    bidRequest
+//            );
+//
+//        log.info("Auction updated: {}", updatedAuction);
+//
+//        Bid bid = new Bid();
+//        bid.setAuctionId(bidDTO.getAuctionId());
+//        bid.setUserId(userId);
+//        bid.setAmount(bidDTO.getAmount());
+//        bid.setTimestamp(LocalDateTime.now());
+//
+//        Bid savedBid = bidRepository.save(bid);
+//        BidDTO savedBidDTO = convertToDTO(savedBid);
+//
+//        // Send WebSocket notification about the new bid
+//        notificationClient.sendBidUpdate(bidDTO.getAuctionId(), savedBidDTO);
+//
+//        return savedBidDTO;
+//    }
+
     @Transactional
     public BidDTO createBid(BidDTO bidDTO, Long userId) {
         log.info("Creating bid for auction: {} by user: {}", bidDTO.getAuctionId(), userId);
@@ -72,15 +103,26 @@ public class BidService {
                     bidRequest
             );
 
-            log.info("Auction updated successfully with new bid amount: {}", bidDTO.getAmount());
+//            log.info("Auction updated successfully with new bid amount: {}", bidDTO.getAmount());
+            System.out.println("Auction updated successfully with new bid amount");
+            Bid savedBid;
+            try{
+                Bid bid = new Bid();
+                bid.setAuctionId(bidDTO.getAuctionId());
+                bid.setUserId(userId);
+                bid.setAmount(bidDTO.getAmount());
 
+                savedBid = bidRepository.save(bid);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to save bid with id: " + bidDTO.getAuctionId(), e);
+            }
             // Now save the bid in our database
-            Bid bid = new Bid();
-            bid.setAuctionId(bidDTO.getAuctionId());
-            bid.setUserId(userId);
-            bid.setAmount(bidDTO.getAmount());
-
-            Bid savedBid = bidRepository.save(bid);
+//            Bid bid = new Bid();
+//            bid.setAuctionId(bidDTO.getAuctionId());
+//            bid.setUserId(userId);
+//            bid.setAmount(bidDTO.getAmount());
+//
+//            Bid savedBid = bidRepository.save(bid);
 
             // Send notification about the new bid
             try {

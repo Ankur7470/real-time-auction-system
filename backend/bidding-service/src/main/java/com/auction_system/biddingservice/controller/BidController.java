@@ -26,28 +26,24 @@ public class BidController {
     }
 
     @GetMapping("/auction/{auctionId}")
-//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<BidDTO>> getBidsByAuctionId(@PathVariable Long auctionId) {
         log.info("Fetching bids for auction with id: {}", auctionId);
         return ResponseEntity.ok(bidService.getBidsByAuctionId(auctionId));
     }
 
     @GetMapping("/user/{userId}")
-//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<BidDTO>> getBidsByUserId(@PathVariable Long userId) {
         log.info("Fetching bids for user with id: {}", userId);
         return ResponseEntity.ok(bidService.getBidsByUserId(userId));
     }
 
     @GetMapping("/{id}")
-//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BidDTO> getBidById(@PathVariable Long id) {
         log.info("Fetching bid with id: {}", id);
         return ResponseEntity.ok(bidService.getBidById(id));
     }
 
     @PostMapping
-//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BidDTO> createBid(
             @Valid @RequestBody BidDTO bidDTO,
             @RequestHeader("X-User-ID") Long userId) {

@@ -39,7 +39,7 @@ public class WebSecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**", "/api/users/**").permitAll()
+                        auth.requestMatchers("/api/auth/**").permitAll()
                             .anyRequest().authenticated()
                 );
         return http.build();

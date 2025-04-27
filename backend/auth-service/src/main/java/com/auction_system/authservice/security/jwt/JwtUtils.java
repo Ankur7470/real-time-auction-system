@@ -14,6 +14,11 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.function.Function;
+
+//import static sun.net.www.protocol.http.AuthenticatorKeys.getKey;
+
+//import static sun.net.www.protocol.http.AuthenticatorKeys.getKey;
 
 @Component
 public class JwtUtils {
@@ -48,6 +53,26 @@ public class JwtUtils {
                 .getBody()
                 .getSubject();
     }
+
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+        public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
+        private Claims extractAllClaims(String token) {
+        return (Claims) Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token);
+        }
 
     public boolean validateJwtToken(String authToken) {
         try {
