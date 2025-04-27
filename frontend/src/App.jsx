@@ -13,8 +13,9 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Register from './pages/Register';
+import ErrorBoundary from './components/ErrorBoundary';
 import { checkAuthStatus } from './slices/authSlice';
-import { connectWebSocket } from './services/websockerService';
+import { connectWebSocket, disconnectWebSocket } from './services/websockerService';
 
 const theme = createTheme({
   palette: {
@@ -30,25 +31,42 @@ const theme = createTheme({
 
 function App() {
   const dispatch = useDispatch();
-  // const navigate = useNavigate();
-  const { isAuthenticated, user, loading, error } = useSelector((state) => state.auth);
+
+ const { isAuthenticated, user, loading, error } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(checkAuthStatus())
       .unwrap()
-      .catch(() => {
+      .catch((err) => {
+        console.error('Auth check failed:', err);
         // if (err.message) {
         //   toast.error(err.message);
         // }
       });
-  }, [dispatch]);
-
-  // Connect to WebSocket when authenticated
+  }, [dispatch]); 
+  
   useEffect(() => {
     if (isAuthenticated && user) {
-      connectWebSocket(dispatch, user.id);
+      // Store dispatch in window for WebSocket callbacks
+      window.reduxStore = { dispatch };
+      
+      // Connect to WebSocket
+      connectWebSocket(user.id);
+      
+      return () => {
+        // Disconnect WebSocket on unmount or logout
+        disconnectWebSocket();
+        delete window.reduxStore;
+      };
     }
   }, [isAuthenticated, user, dispatch]);
+
+  // Connect to WebSocket when authenticated
+  // useEffect(() => {
+  //   if (isAuthenticated && user) {
+  //     connectWebSocket(dispatch, user.id);
+  //   }
+  // }, [isAuthenticated, user, dispatch]);
 
   // Show global errors
   useEffect(() => {
@@ -68,7 +86,8 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ErrorBoundary>
+      {/* <ToastContainer position="top-right" autoClose={3000} /> */}
       <div className="min-h-screen bg-gray-100">
 
       <Routes>
@@ -85,6 +104,9 @@ function App() {
         </Route>
       </Routes>
       </div>
+      </ErrorBoundary>
+      <ToastContainer position="top-right" autoClose={3000} />
+
     </ThemeProvider>
   );
 }

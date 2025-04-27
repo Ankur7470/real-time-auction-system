@@ -9,30 +9,6 @@ const api = axios.create({
   // timeout: 10000
 });
 
-// Request interceptor for adding auth token
-// api.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem('token');
-//     if (token) {
-//       config.headers['Authorization'] = `Bearer ${token}`;
-      
-//       // Add user ID from localStorage instead of store
-//       const userStr = JSON.parse(localStorage.getItem('user'));
-//       if (userStr) {
-//         try {
-//           const user = JSON.parse(userStr);
-//           if (user && user.id) {
-//             config.headers['X-User-ID'] = user.id;
-//           }
-//         } catch (e) {
-//           console.error('Error parsing user from localStorage:', e);
-//         }
-//       }
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token');

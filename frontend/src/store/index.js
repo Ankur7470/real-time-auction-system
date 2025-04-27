@@ -1,3 +1,4 @@
+// src/store/index.js
 import { configureStore } from '@reduxjs/toolkit';
 import auctionReducer from '../slices/auctionSlice';
 import authReducer from '../slices/authSlice';
@@ -15,7 +16,11 @@ const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore non-serializable values in specific action types
-        ignoredActions: ['auth/login/fulfilled', 'notifications/addNotification'],
+        ignoredActions: [
+         'auth/login/fulfilled', 
+          'notifications/addNotification',
+          'auth/checkStatus/fulfilled'
+        ],
       },
     }),
 });
