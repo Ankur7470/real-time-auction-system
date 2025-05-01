@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   define: {
@@ -10,13 +9,19 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8000',  // Proxy API requests
         changeOrigin: true,
       },
-       '/ws': {
-         target: 'http://localhost:8000',
-        ws: true,
-      }
+
+      // Proxy WebSocket connections with SockJS support
+      '/ws-auction': {
+        target: 'http://localhost:8000',  // Ensure it's pointing to the correct backend
+        ws: true,  // Handle WebSocket upgrades
+        changeOrigin: true,
+        secure: false,  // Allow insecure connections if necessary
+      },
     }
   }
 })
+
+

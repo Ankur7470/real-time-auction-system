@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react';
+/*import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 // import { FaPlus } from 'react-icons/fa';
 import AuctionCard from '../components/AuctionCard';
 import { fetchUserAuctions, fetchWonAuctions } from '../slices/auctionSlice';
-import { fetchUserBids } from '../slices/biddingSlice';
+//import { fetchUserBids } from '../slices/biddingSlice';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { userAuctions, wonAuctions, error: auctionsError } = useSelector((state) => state.auctions);
-  const { userBids, error: bidsError } = useSelector((state) => state.bidding);
+  //const { userBids, error: bidsError } = useSelector((state) => state.bidding);
 
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,7 @@ const Dashboard = () => {
         // Use Promise.all to fetch data in parallel
         await Promise.all([
           dispatch(fetchUserAuctions()).unwrap(),
-          dispatch(fetchUserBids()).unwrap(),
+          //dispatch(fetchUserBids()).unwrap(),
           dispatch(fetchWonAuctions()).unwrap()
         ]);
       } catch (error) {
@@ -51,7 +51,7 @@ const Dashboard = () => {
 
   const tabs = [
     { name: 'My Auctions', count: userAuctions?.length || 0 },
-    { name: 'My Bids', count: userBids?.length || 0 },
+  //  { name: 'My Bids', count: userBids?.length || 0 },
     { name: 'Won Auctions', count: wonAuctions?.length || 0 },
   ];
 
@@ -85,7 +85,7 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-      {/*  */}
+
       {auctionsError && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {auctionsError.message || 'Error loading auctions'}
@@ -97,10 +97,10 @@ const Dashboard = () => {
           {bidsError.message || 'Error loading bids'}
         </Alert>
       )}
-      {/*  */}
+    
       {activeTab === 0 && (
         <div>
-          {/* <h2 className="text-xl font-semibold text-gray-800 mb-4">My Auctions</h2> */}
+       
           {userAuctions.length === 0 ? (
             <div className="bg-white rounded-lg shadow-md p-8 text-center">
               <p className="text-gray-600 mb-4">You haven't created any auctions yet.</p>
@@ -176,4 +176,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard;*/

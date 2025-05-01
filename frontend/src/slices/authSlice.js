@@ -166,7 +166,7 @@ import {
   REGISTER_ENDPOINT, 
   CURRENT_USER_ENDPOINT 
 } from '../constants/apiEndpoints';
-import axios from 'axios';
+// import axios from 'axios';
 
 // Get initial state from localStorage
 const getUserFromStorage = () => {
