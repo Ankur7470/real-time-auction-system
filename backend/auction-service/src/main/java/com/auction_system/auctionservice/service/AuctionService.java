@@ -1,6 +1,6 @@
 package com.auction_system.auctionservice.service;
 
-import com.auction_system.auctionservice.client.NotificationClient;
+//import com.auction_system.auctionservice.client.NotificationClient;
 import com.auction_system.auctionservice.client.UserClient;
 import com.auction_system.auctionservice.dto.AuctionDto;
 import com.auction_system.auctionservice.dto.NotificationDto;
@@ -32,9 +32,6 @@ public class AuctionService {
     @Autowired
     private UserClient userClient;
 
-    @Autowired
-    private NotificationClient notificationClient;
-
     public List<AuctionDto> getAllActiveAuctions() {
         List<Auction> auctions = auctionRepository.findByStatusOrderByEndTimeAsc(AuctionStatus.ACTIVE);
         return auctions.stream()
@@ -42,10 +39,10 @@ public class AuctionService {
                 .collect(Collectors.toList());
     }
 
-    public AuctionDto getAuctionById(Long id) {
+    public Auction getAuctionById(Long id) {
         Auction auction = auctionRepository.findById(id)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with id: " + id));
-        return convertToDTO(auction);
+        return auction;
     }
 
     @Transactional
@@ -64,17 +61,6 @@ public class AuctionService {
 
         Auction savedAuction = auctionRepository.save(auction);
         log.info("Created auction with id: {}", savedAuction.getId());
-
-        try {
-            notificationClient.sendNotification(new NotificationDto(
-                    null,
-                    "New auction created: " + auction.getTitle(),
-                    "NEW_AUCTION",
-                    savedAuction.getId()
-            ));
-        } catch (Exception e) {
-            log.error("Failed to send notification for new auction: {}", e.getMessage());
-        }
 
         return convertToDTO(savedAuction);
     }
@@ -110,6 +96,13 @@ public class AuctionService {
         return convertToDTO(updatedAuction);
     }
 
+
+    @Transactional
+    public void updateAuctionCurrentPrice(Long auctionId, BigDecimal amount) {
+        Auction auction = getAuctionById(auctionId);
+        auction.setCurrentPrice(amount);
+    }
+
     @Transactional
     public void deleteAuction(Long id, Long userId) {
         Auction auction = auctionRepository.findById(id)
@@ -142,49 +135,35 @@ public class AuctionService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public AuctionDto updateBid(Long id, BigDecimal amount, Long userId) {
-        Auction auction = auctionRepository.findById(id)
-                .orElseThrow(() -> new AuctionNotFoundException("Auction not found with id: " + id));
+@Transactional
+public AuctionDto updateBid(Long id, BigDecimal amount, Long userId) {
+    Auction auction = auctionRepository.findById(id)
+            .orElseThrow(() -> new AuctionNotFoundException("Auction not found"));
 
-        if (auction.getStatus() != AuctionStatus.ACTIVE) {
-            throw new IllegalStateException("Auction is not active");
-        }
-
-        if (auction.getEndTime().isBefore(LocalDateTime.now())) {
-            auction.setStatus(AuctionStatus.ENDED);
-            auctionRepository.save(auction);
-            throw new IllegalStateException("Auction has ended");
-        }
-
-        if (auction.getSellerId().equals(userId)) {
-            throw new IllegalStateException("Seller cannot bid on their own auction");
-        }
-
-        if (amount.compareTo(auction.getCurrentPrice()) <= 0) {
-            throw new IllegalStateException("Bid amount must be greater than current price");
-        }
-
-        auction.setCurrentPrice(amount);
-        auction.setWinnerId(userId);
-        Auction updatedAuction = auctionRepository.save(auction);
-
-        log.info("Updated bid for auction id: {} to amount: {}", id, amount);
-
-        try {
-            // Notify seller about new bid
-            notificationClient.sendNotification(new NotificationDto(
-                    auction.getSellerId(),
-                    "New bid of $" + amount + " on your auction: " + auction.getTitle(),
-                    "NEW_BID",
-                    auction.getId()
-            ));
-        } catch (Exception e) {
-            log.error("Failed to send notification to seller: {}", e.getMessage());
-        }
-
-        return convertToDTO(updatedAuction);
+    // Validate auction status
+    if (auction.getStatus() != AuctionStatus.ACTIVE) {
+        throw new IllegalStateException("Auction is not active");
     }
+
+    // Validate bid amount
+    if (amount.compareTo(auction.getCurrentPrice()) <= 0) {
+        throw new IllegalArgumentException("Bid must be higher than current price");
+    }
+
+    // Validate user is not seller
+    if (auction.getSellerId().equals(userId)) {
+        throw new IllegalArgumentException("Seller cannot bid on their own auction");
+    }
+
+    // Update auction
+    auction.setCurrentPrice(amount);
+    auction.setWinnerId(userId);
+    Auction updatedAuction = auctionRepository.save(auction);
+
+    log.info("Updated bid for auction {} to {}", id, amount);
+
+    return convertToDTO(updatedAuction);
+}
 
     @Scheduled(fixedRate = 60000) // Run every minute
     @Transactional
@@ -197,28 +176,6 @@ public class AuctionService {
             auctionRepository.save(auction);
 
             log.info("Auction with id: {} has ended", auction.getId());
-
-            try {
-                // Notify seller
-                notificationClient.sendNotification(new NotificationDto(
-                        auction.getSellerId(),
-                        "Your auction '" + auction.getTitle() + "' has ended with final price: $" + auction.getCurrentPrice(),
-                        "AUCTION_ENDED",
-                        auction.getId()
-                ));
-
-                // Notify winner if there is one
-                if (auction.getWinnerId() != null) {
-                    notificationClient.sendNotification(new NotificationDto(
-                            auction.getWinnerId(),
-                            "You won the auction '" + auction.getTitle() + "' with your bid of $" + auction.getCurrentPrice(),
-                            "AUCTION_WON",
-                            auction.getId()
-                    ));
-                }
-            } catch (Exception e) {
-                log.error("Failed to send auction ended notifications: {}", e.getMessage());
-            }
         }
     }
 

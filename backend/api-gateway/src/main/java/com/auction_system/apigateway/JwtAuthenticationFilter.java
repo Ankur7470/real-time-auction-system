@@ -28,8 +28,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/auth/register",
             "/api/auctions",
             "/api/bids/auction/**",
-//            "/api/bids/user/**",
             "/api/auth/users/me"
+//            "/ws-auction"
     );
 
     @Override

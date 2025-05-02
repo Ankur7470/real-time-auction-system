@@ -2,23 +2,17 @@ package com.auction_system.authservice.security.jwt;
 
 import com.auction_system.authservice.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
-
-//import static sun.net.www.protocol.http.AuthenticatorKeys.getKey;
-
-//import static sun.net.www.protocol.http.AuthenticatorKeys.getKey;
 
 @Component
 public class JwtUtils {

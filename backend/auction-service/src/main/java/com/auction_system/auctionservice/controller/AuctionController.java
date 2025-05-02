@@ -1,15 +1,17 @@
 package com.auction_system.auctionservice.controller;
 
 import com.auction_system.auctionservice.dto.AuctionDto;
+import com.auction_system.auctionservice.dto.BidRequest;
+import com.auction_system.auctionservice.model.Auction;
 import com.auction_system.auctionservice.service.AuctionService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +35,7 @@ public class AuctionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuctionDto> getAuctionById(@PathVariable Long id) {
+    public ResponseEntity<Auction> getAuctionById(@PathVariable Long id) {
         log.info("Fetching auction with id: {}", id);
         return ResponseEntity.ok(auctionService.getAuctionById(id));
     }
@@ -65,6 +67,11 @@ public class AuctionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/current-price")
+    public void updateAuctionCurrentPrice(Long auctionId, BigDecimal amount) {
+        auctionService.updateAuctionCurrentPrice(auctionId, amount);
+    }
+
     @GetMapping("/seller/{sellerId}")
     public ResponseEntity<List<AuctionDto>> getAuctionsBySeller(@PathVariable Long sellerId) {
         log.info("Fetching auctions for seller with id: {}", sellerId);
@@ -77,24 +84,18 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.getAuctionsByWinner(winnerId));
     }
 
-    @PostMapping("/{id}/bid")
-    public ResponseEntity<AuctionDto> placeBid(
-            @PathVariable Long id,
-            @RequestBody Map<String, Object> bidRequest,
-            @RequestHeader("X-User-ID") Long userId) {
-        log.info("Placing bid on auction with id: {}", id);
+@PostMapping("/{id}/bid")
+public ResponseEntity<AuctionDto> placeBid(
+        @PathVariable Long id,
+        @RequestBody BidRequest request, // Create dedicated request DTO
+        @RequestHeader("X-User-ID") Long userId) {
 
-        if (!bidRequest.containsKey("amount")) {
-            return ResponseEntity.badRequest().build();
-        }
 
-        try {
-            Double amount = Double.parseDouble(bidRequest.get("amount").toString());
-            AuctionDto updatedAuction = auctionService.updateBid(id, java.math.BigDecimal.valueOf(amount), userId);
-            return ResponseEntity.ok(updatedAuction);
-        } catch (NumberFormatException e) {
-            log.error("Invalid bid amount format", e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
+        AuctionDto updatedAuction = auctionService.updateBid(
+                id,
+                request.getAmount(),
+                userId
+        );
+        return ResponseEntity.ok(updatedAuction);
+}
 }

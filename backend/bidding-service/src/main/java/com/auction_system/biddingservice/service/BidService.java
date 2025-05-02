@@ -1,18 +1,17 @@
 package com.auction_system.biddingservice.service;
 
 import com.auction_system.biddingservice.client.AuctionClient;
-import com.auction_system.biddingservice.client.NotificationClient;
+//import com.auction_system.biddingservice.client.NotificationClient;
 import com.auction_system.biddingservice.client.UserClient;
-import com.auction_system.biddingservice.dto.AuctionDTO;
-import com.auction_system.biddingservice.dto.BidDTO;
-import com.auction_system.biddingservice.dto.NotificationDTO;
-import com.auction_system.biddingservice.dto.UserDTO;
+import com.auction_system.biddingservice.dto.*;
 import com.auction_system.biddingservice.entity.Bid;
+import com.auction_system.biddingservice.exception.BidException;
 import com.auction_system.biddingservice.exception.BidNotFoundException;
 import com.auction_system.biddingservice.repo.BidRepository;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,8 +35,8 @@ public class BidService {
     @Autowired
     private AuctionClient auctionClient;
 
-    @Autowired
-    private NotificationClient notificationClient;
+//    @Autowired
+//    private NotificationService notificationClient;
 
     public List<BidDTO> getBidsByAuctionId(Long auctionId) {
         List<Bid> bids = bidRepository.findByAuctionIdOrderByTimestampDesc(auctionId);
@@ -52,95 +52,66 @@ public class BidService {
                 .collect(Collectors.toList());
     }
 
-    public BidDTO getBidById(Long id) {
-        Bid bid = bidRepository.findById(id)
-                .orElseThrow(() -> new BidNotFoundException("Bid not found with id: " + id));
-        return convertToDTO(bid);
-    }
-
-//    @Transactional
-//    public BidDTO createBid(BidDTO bidDTO, Long userId) {
-//        log.info("Creating bid for auction: {} by user: {}", bidDTO.getAuctionId(), userId);
-//
-//        Map<String, Object> bidRequest = new HashMap<>();
-//        bidRequest.put("amount", bidDTO.getAmount());
-//
-//        AuctionDTO updatedAuction = auctionClient.updateBid(
-//                    bidDTO.getAuctionId(),
-//                    userId,
-//                    bidRequest
-//            );
-//
-//        log.info("Auction updated: {}", updatedAuction);
-//
-//        Bid bid = new Bid();
-//        bid.setAuctionId(bidDTO.getAuctionId());
-//        bid.setUserId(userId);
-//        bid.setAmount(bidDTO.getAmount());
-//        bid.setTimestamp(LocalDateTime.now());
-//
-//        Bid savedBid = bidRepository.save(bid);
-//        BidDTO savedBidDTO = convertToDTO(savedBid);
-//
-//        // Send WebSocket notification about the new bid
-//        notificationClient.sendBidUpdate(bidDTO.getAuctionId(), savedBidDTO);
-//
-//        return savedBidDTO;
-//    }
-
     @Transactional
-    public BidDTO createBid(BidDTO bidDTO, Long userId) {
-        log.info("Creating bid for auction: {} by user: {}", bidDTO.getAuctionId(), userId);
-
-        // First update the auction with the new bid
-        Map<String, Object> bidRequest = new HashMap<>();
-        bidRequest.put("amount", bidDTO.getAmount());
-
+    public Bid placeBid(BidDTO bidDTO) {
         try {
-            AuctionDTO updatedAuction = auctionClient.updateBid(
+            // 1. Validate bid
+            validateBid(bidDTO);
+
+            // 2. Call auction service
+            ResponseEntity<AuctionDTO> response = auctionClient.placeBid(
                     bidDTO.getAuctionId(),
-                    userId,
-                    bidRequest
+                    new BidRequest(bidDTO.getAmount()),
+                    bidDTO.getUserId()
             );
 
-//            log.info("Auction updated successfully with new bid amount: {}", bidDTO.getAmount());
-            System.out.println("Auction updated successfully with new bid amount");
-            Bid savedBid;
-            try{
-                Bid bid = new Bid();
-                bid.setAuctionId(bidDTO.getAuctionId());
-                bid.setUserId(userId);
-                bid.setAmount(bidDTO.getAmount());
-
-                savedBid = bidRepository.save(bid);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to save bid with id: " + bidDTO.getAuctionId(), e);
-            }
-            // Now save the bid in our database
-//            Bid bid = new Bid();
-//            bid.setAuctionId(bidDTO.getAuctionId());
-//            bid.setUserId(userId);
-//            bid.setAmount(bidDTO.getAmount());
-//
-//            Bid savedBid = bidRepository.save(bid);
-
-            // Send notification about the new bid
-            try {
-                notificationClient.sendNotification(new NotificationDTO(
-                        null,
-                        "New bid of $" + bidDTO.getAmount() + " on auction: " + updatedAuction.getTitle(),
-                        "NEW_BID",
-                        bidDTO.getAuctionId()
-                ));
-            } catch (Exception e) {
-                log.error("Failed to send notification for new bid: {}", e.getMessage());
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new BidException("Failed to place bid: " + response.getBody());
             }
 
-            return convertToDTO(savedBid);
+            // 3. Update current price
+            ResponseEntity<Void> priceResponse = auctionClient.updateCurrentPrice(
+                    bidDTO.getAuctionId(),
+                    bidDTO.getAmount()
+            );
+
+            if (!priceResponse.getStatusCode().is2xxSuccessful()) {
+                log.warn("Failed to update current price for auction {}", bidDTO.getAuctionId());
+            }
+
+            // 4. Save bid
+            Bid bid = new Bid();
+            bid.setAuctionId(bidDTO.getAuctionId());
+            bid.setUserId(bidDTO.getUserId());
+            bid.setAmount(bidDTO.getAmount());
+            bid.setTimestamp(LocalDateTime.now());
+
+            return bidRepository.save(bid);
 
         } catch (FeignException e) {
-            log.error("Failed to update auction with new bid: {}", e.getMessage());
-            throw new IllegalStateException("Failed to place bid: " + e.contentUTF8());
+            log.error("Feign client error: {}", e.contentUTF8());
+            throw new BidException("Failed to communicate with auction service: " + e.contentUTF8());
+        }
+    }
+
+    private void validateBid(BidDTO bidDTO) {
+        try {
+            AuctionDTO auction = auctionClient.getAuctionById(bidDTO.getAuctionId());
+
+            if (!Objects.equals(auction.getStatus(), "ACTIVE")) {
+                throw new BidException("Auction is not active");
+            }
+
+            if (bidDTO.getAmount().compareTo(auction.getCurrentPrice()) <= 0) {
+                throw new BidException("Bid amount must be higher than current price");
+            }
+
+            if (auction.getSeller().getId().equals(bidDTO.getUserId())) {
+                throw new BidException("You cannot bid on your own auction");
+            }
+
+        } catch (FeignException e) {
+            throw new BidException("Failed to validate bid: " + e.contentUTF8());
         }
     }
 
@@ -151,27 +122,15 @@ public class BidService {
         dto.setUserId(bid.getUserId());
         dto.setAmount(bid.getAmount());
         dto.setTimestamp(bid.getTimestamp());
-
         try {
-            // Get user information
             UserDTO user = userClient.getUserById(bid.getUserId());
             dto.setUser(user);
-
-            // Get auction information
-            AuctionDTO auction = auctionClient.getAuctionById(bid.getAuctionId());
-            dto.setAuction(auction);
-        } catch (FeignException e) {
-            log.error("Error fetching related information: {}", e.getMessage());
-            // Set basic information if service call fails
+        } catch (Exception e) {
             UserDTO user = new UserDTO();
             user.setId(bid.getUserId());
             dto.setUser(user);
-
-            AuctionDTO auction = new AuctionDTO();
-            auction.setId(bid.getAuctionId());
-            dto.setAuction(auction);
         }
-
         return dto;
     }
+
 }

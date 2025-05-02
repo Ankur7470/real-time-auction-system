@@ -1,6 +1,5 @@
 package com.auction_system.authservice.controller;
 
-import com.auction_system.authservice.model.User;
 import com.auction_system.authservice.payload.UserDto;
 import com.auction_system.authservice.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +20,4 @@ public class UserController {
         log.info("Fetching user with id: {}", id);
         return ResponseEntity.ok(userService.getUserById(id));
     }
-
-//    @GetMapping("/me")
-//    public ResponseEntity<User> getCurrentUser() {
-//        log.info("Fetching current user with id: {}", userId);
-//        return ResponseEntity.ok(userService.getAuthenticatedUser());
-//    }
-
-
 }
