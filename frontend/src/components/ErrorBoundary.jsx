@@ -1,4 +1,3 @@
-// src/components/common/ErrorBoundary.jsx
 import { Component } from 'react';
 import { Alert, Button, Box, Typography } from '@mui/material';
 

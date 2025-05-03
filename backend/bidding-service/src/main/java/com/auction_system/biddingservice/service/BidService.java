@@ -52,6 +52,7 @@ public class BidService {
         return bids.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
     }
 
     @Transactional
@@ -134,6 +135,8 @@ public class BidService {
         dto.setUserId(bid.getUserId());
         dto.setAmount(bid.getAmount());
         dto.setTimestamp(bid.getTimestamp());
+
+        // Add user details
         try {
             UserDTO user = userClient.getUserById(bid.getUserId());
             dto.setUser(user);
@@ -142,6 +145,17 @@ public class BidService {
             user.setId(bid.getUserId());
             dto.setUser(user);
         }
+
+        // Add auction details - you'll need to implement this
+        try {
+            AuctionDTO auction = auctionClient.getAuctionById(bid.getAuctionId());
+            dto.setAuction(auction);
+        } catch (Exception e) {
+            AuctionDTO auction = new AuctionDTO();
+            auction.setId(bid.getAuctionId());
+            dto.setAuction(auction);
+        }
+
         return dto;
     }
 

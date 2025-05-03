@@ -1,4 +1,3 @@
-// src/components/common/LoadingSpinner.jsx
 import { CircularProgress, Box } from '@mui/material';
 
 const LoadingSpinner = ({ size = 40, message = 'Loading...' }) => {

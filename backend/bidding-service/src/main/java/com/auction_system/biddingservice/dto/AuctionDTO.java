@@ -12,6 +12,7 @@ public class AuctionDTO {
     private Long id;
     private String title;
     private String description;
+    private String imageUrl;
     private BigDecimal startingPrice;
     private BigDecimal currentPrice;
     private LocalDateTime endTime;

@@ -12,7 +12,6 @@ import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Register from './pages/Register';
 //import ErrorBoundary from './components/ErrorBoundary';
-// import { AuthProvider } from './context/AuthContext';
 
 const theme = createTheme({
   palette: {
