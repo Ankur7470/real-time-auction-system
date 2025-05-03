@@ -1,155 +1,192 @@
-import SockJS from 'sockjs-client';
-import { Client } from 'stompjs';
-import { addNewBid } from '../slices/biddingSlice';
-import { updateAuctionInList } from '../slices/auctionSlice';
-import { addNotification } from '../slices/notificationSlice';
+// // // src/services/websocketService.js
+// // import SockJS from 'sockjs-client';
+// // import { Client } from '@stomp/stompjs';
+// // import { addNewBid } from '../slices/biddingSlice';
+// // import { updateAuctionInList } from '../slices/auctionSlice';
+// // import { addNotification } from '../slices/notificationSlice';
 
-let stompClient = null;
-let isConnecting = false;
-let reconnectTimeout = null;
+// // let stompClient = null;
+// // let isConnecting = false;
+// // let reconnectTimeout = null;
+// // let shouldReconnect = true;
+// // const RECONNECT_DELAY = 5000;
 
-export const connectWebSocket = (dispatch, userId) => {
-  if (stompClient !== null || isConnecting) {
-    return stompClient;
-  }
-  
-  isConnecting = true;
-  clearTimeout(reconnectTimeout);
-  
-  try {
-    const socket = new SockJS('/api/ws');
-    stompClient = new Client({
-      webSocketFactory: () => socket,
-      debug: false,
-      reconnectDelay: 5000,
-    });
+// // export const isConnected = ()=>{
+// // return stompClient?.connected;
+// // }
 
-    stompClient.connect({}, () => {
-      isConnecting = false;
-      console.log('WebSocket connected successfully');
-      
-      // Subscribe to user-specific notifications
-      if (userId) {
-        stompClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
-          try {
-            const notification = JSON.parse(message.body);
-            dispatch(addNotification(notification));
-          } catch (error) {
-            console.error('Error processing notification:', error);
-          }
-        });
-      }
+// // export const connectWebSocket = (dispatch, userId) => {
+// //   if (stompClient?.connected) return stompClient;
+// //   if (isConnecting) return;
 
-      // Subscribe to global auction updates
-      stompClient.subscribe('/topic/auctions', (message) => {
-        try {
-          const auction = JSON.parse(message.body);
-          dispatch(updateAuctionInList(auction));
-        } catch (error) {
-          console.error('Error processing auction update:', error);
-        }
-      });
-    }, (error) => {
-      console.error('WebSocket connection error:', error);
-      isConnecting = false;
-      
-      // Attempt to reconnect after delay
-      reconnectTimeout = setTimeout(() => {
-        connectWebSocket(dispatch, userId);
-      }, 5000);
-    });
+// //   isConnecting = true;
 
-    return stompClient;
-  } catch (error) {
-    console.error('Error establishing WebSocket connection:', error);
-    isConnecting = false;
+// //   const socket = new SockJS('/ws-auction');
+// //   stompClient = new Client({
+// //     webSocketFactory: () => socket,
+// //     debug: (str) => console.debug('STOMP: ' + str),
+// //     reconnectDelay: 5000,
+// //     heartbeatIncoming: 4000,
+// //     heartbeatOutgoing: 4000,
+// //   });
+
+// //   stompClient.onConnect = () => {
+// //     isConnecting = false;
+// //     console.log('WebSocket connected successfully');
     
-    // Attempt to reconnect after delay
-    reconnectTimeout = setTimeout(() => {
-      connectWebSocket(dispatch, userId);
-    }, 5000);
-    
-    return null;
-  }
-};
+// //     // Global subscriptions here if needed
+// //   };
 
-export const subscribeToAuction = (auctionId, dispatch, userId) => {
-  if (!stompClient || !stompClient.connected) {
-    console.warn('WebSocket not connected. Cannot subscribe to auction.');
-    return false;
-  }
+// //   stompClient.onStompError = (frame) => {
+// //     console.error('STOMP error:', frame.headers.message, frame.body);
+// //   };
 
-  try {
-    // Subscribe to auction-specific updates
-    const auctionSubscription = stompClient.subscribe(`/topic/auction/${auctionId}`, (message) => {
-      try {
-        const auction = JSON.parse(message.body);
-        dispatch(updateAuctionInList(auction));
-      } catch (error) {
-        console.error('Error processing auction update:', error);
-      }
-    });
+// //   stompClient.onWebSocketClose = () => {
+// //     console.log('WebSocket disconnected');
+// //   };
 
-    // Subscribe to auction bids
-    const bidsSubscription = stompClient.subscribe(`/topic/bids/${auctionId}`, (message) => {
-      try {
-        const bid = JSON.parse(message.body);
-        const currentUserId = userId;
-        
-        dispatch(addNewBid({
-          ...bid,
-          isCurrentUser: bid.userId === currentUserId
-        }));
-        
-        // Add notification if the bid is not from the current user
-        if (userId && bid.userId !== userId) {
-          dispatch(addNotification({
-            id: Date.now(),
-            message: `New bid of $${bid.amount.toFixed(2)} on auction "${bid.auctionTitle || 'Unknown'}"`,
-            timestamp: new Date(),
-          }));
-        }
-      } catch (error) {
-        console.error('Error processing bid update:', error);
-      }
-    });
+// //   stompClient.activate();
+// //   return stompClient;
+// // };
 
-    return { auctionSubscription, bidsSubscription };
-  } catch (error) {
-    console.error('Error subscribing to auction:', error);
-    return false;
-  }
-};
+// // const handleDisconnection = (dispatch, userId) => {
+// //   isConnecting = false;
+// //   if (shouldReconnect) {
+// //     console.log(`Attempting to reconnect in ${RECONNECT_DELAY / 1000} seconds...`);
+// //     reconnectTimeout = setTimeout(() => {
+// //       connectWebSocket(dispatch, userId);
+// //     }, RECONNECT_DELAY);
+// //   }
+// // };
 
-export const disconnectWebSocket = () => {
-  if (stompClient && stompClient.connected) {
-    try {
-      stompClient.disconnect();
-      console.log('WebSocket disconnected');
-    } catch (error) {
-      console.error('Error disconnecting WebSocket:', error);
-    }
-    stompClient = null;
-  }
+// // export const subscribeToAuction = (auctionId, dispatch, userId) => {
+// //   if (!stompClient?.connected) {
+// //     console.warn('WebSocket not connected');
+// //     return null;
+// //   }
+
+// //   const auctionSub = stompClient.subscribe(
+// //     `/topic/auction/${auctionId}`,
+// //     (message) => dispatch(updateAuction(message.body))
+// //   );
+
+// //   const bidsSub = stompClient.subscribe(
+// //     `/topic/bids/${auctionId}`,
+// //     (message) => dispatch(addNewBid(message.body))
+// //   );
+
+// //   return { auctionSub, bidsSub };
+// // };
+
+
+// // export const disconnectWebSocket = () => {
+// //   shouldReconnect = false;
+// //   if (stompClient && stompClient.connected) {
+// //     stompClient.deactivate().then(() => {
+// //       console.log('WebSocket successfully disconnected');
+// //     }).catch((error) => {
+// //       console.error('Error during disconnection:', error);
+// //     });
+// //   }
+// //   clearTimeout(reconnectTimeout);
+// // };
+
+// // export const sendBid = (auctionId, amount) => {
+
+// //   if (!stompClient || !stompClient.connected) {
+// //     console.warn('WebSocket not connected. Cannot send bid.');
+// //     return false;
+// //   }
   
-  clearTimeout(reconnectTimeout);
-  isConnecting = false;
-};
+// //   try {
+// //     stompClient.publish({
+// //       destination: '/app/bid',
+// //       body: JSON.stringify({ auctionId, amount }),
+// //       headers: { 'content-type': 'application/json' }
+// //     });
+// //     return true;
+// //   } catch (error) {
+// //     console.error('Error sending bid:', error);
+// //     return false;
+// //   }
+// // };
 
-export const sendBid = (auctionId, amount) => {
-  if (!stompClient || !stompClient.connected) {
-    console.warn('WebSocket not connected. Cannot send bid.');
-    return false;
-  }
-  
-  try {
-    stompClient.send('/app/bid', {}, JSON.stringify({
-      auctionId,
-      amount
-    }));
-    return true;
-  } catch (error) {
-    console.error('Error sending bid:', error);
-    return false;
-  }
-};
+
+// import SockJS from 'sockjs-client';
+// import { Client } from '@stomp/stompjs';
+
+// let stompClient = null;
+
+// export const connectWebSocket = (dispatch, userId) => {
+//   if (stompClient && stompClient.connected) {
+//     return stompClient;
+//   }
+
+//   const socket = new SockJS('/ws-auction');
+//   stompClient = new Client({
+//     webSocketFactory: () => socket,
+//     debug: (str) => console.debug('STOMP: ' + str),
+//     reconnectDelay: 5000,
+//     heartbeatIncoming: 4000,
+//     heartbeatOutgoing: 4000,
+//   });
+
+//   stompClient.onConnect = () => {
+//     console.log('WebSocket connected');
+//   };
+
+//   stompClient.onStompError = (frame) => {
+//     console.error('STOMP error:', frame.headers.message, frame.body);
+//   };
+
+//   stompClient.activate();
+//   return stompClient;
+// };
+
+// export const sendBid = (auctionId, amount, userId) => {
+//   if (!stompClient || !stompClient.connected) {
+//     console.error('WebSocket not connected');
+//     return false;
+//   }
+
+//   try {
+//     stompClient.publish({
+//       destination: '/app/bid',
+//       body: JSON.stringify({
+//         auctionId,
+//         amount,
+//         userId
+//       }),
+//       headers: { 'content-type': 'application/json' }
+//     });
+//     return true;
+//   } catch (error) {
+//     console.error('Error sending bid:', error);
+//     return false;
+//   }
+// };
+
+// export const subscribeToAuction = (auctionId, callback) => {
+//   if (!stompClient || !stompClient.connected) {
+//     console.error('WebSocket not connected');
+//     return null;
+//   }
+
+//   return stompClient.subscribe(
+//     `/topic/auction/${auctionId}`,
+//     callback
+//   );
+// };
+
+
+//  export const disconnectWebSocket = () => {
+//    shouldReconnect = false;
+//   if (stompClient && stompClient.connected) {
+//      stompClient.deactivate().then(() => {
+//        console.log('WebSocket successfully disconnected');
+//      }).catch((error) => {
+//        console.error('Error during disconnection:', error);
+//      });
+//    }
+//    clearTimeout(reconnectTimeout);
+// };

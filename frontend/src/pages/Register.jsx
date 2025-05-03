@@ -1,29 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { FaLock, FaEnvelope, FaUser } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { clearError, register } from '../slices/authSlice';
+import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const dispatch = useDispatch();
+  const { register } = useAuth();
+
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.auth);
 
-  // Clear error when component unmounts
-  useEffect(() => {
-    return () => {
-      dispatch(clearError());
-    };
-  }, [dispatch]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setError('');
+    setLoading(true);
 
     // Basic validation
     if (!username || !email || !password || !confirmPassword) {
@@ -40,16 +37,25 @@ const Register = () => {
       toast.error('Password must be at least 6 characters');
       return;
     }
-
-    dispatch(register({ username, email, password }))
-      .unwrap()
-      .then(() => {
-        toast.success('Registration successful! Please log in.');
-        navigate('/login');
-      })
-      .catch(() => {
-        // Error is handled by the reducer and displayed in the component
+    
+    try {
+      const success = await register({
+        username,
+        email,
+        password
       });
+      
+      if (success) {
+        navigate('/login');
+      } else {
+        setError('Registration failed. Username or email may already be in use.');
+      }
+    } catch (err) {
+      setError('An error occurred during registration');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

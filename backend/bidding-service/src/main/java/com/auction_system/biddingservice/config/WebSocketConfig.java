@@ -38,30 +38,8 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
-//@Configuration
-//@EnableWebSocketMessageBroker
-//public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-//
-//    @Override
-//    public void configureMessageBroker(MessageBrokerRegistry config) {
-//        config.enableSimpleBroker("/topic");
-//        config.setApplicationDestinationPrefixes("/app");
-//    }
-//
-//    @Override
-//    public void registerStompEndpoints(StompEndpointRegistry registry) {
-//        registry.addEndpoint("/ws-auction")
-//                .setAllowedOrigins("http://localhost:5173")
-////                .setAllowedOriginPatterns("*")
-//                .withSockJS();
-//    }
-//
-//    @Bean
-//    public MappingJackson2MessageConverter messageConverter() {
-//        return new MappingJackson2MessageConverter();
-//    }
-//}
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -69,16 +47,25 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "/queue");
+        config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/app");
-        config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-auction")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
+                .setAllowedOriginPatterns("http://localhost:5173")
+                .addInterceptors(authShakeInterceptor())
+                .setHandshakeHandler(new DefaultHandshakeHandler())
+                .withSockJS()
+                .setSuppressCors(true);
+
+
+    }
+
+    @Bean
+    public AuthShakeInterceptor authShakeInterceptor() {
+        return new AuthShakeInterceptor();
     }
 
     @Bean

@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaImage, FaTag, FaAlignLeft, FaDollarSign, FaClock, FaList } from 'react-icons/fa';
 import moment from 'moment';
-import { createAuction } from '../slices/auctionSlice';
+import api from '../services/axiosConfig';
 
 const categories = [
   'Electronics',
@@ -20,9 +19,10 @@ const categories = [
 ];
 
 const CreateAuction = () => {
-  const dispatch = useDispatch();
+
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.auctions);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -59,23 +59,36 @@ const CreateAuction = () => {
       toast.error('End time must be at least 1 hour from now');
       return;
     }
-    
-    dispatch(createAuction({
+
+    const auctionData = {
       ...formData,
       startingPrice: parseFloat(formData.startingPrice),
-      endTime: formData.endTime,
-    }))
-      .unwrap()
-      .then((auction) => {
-        setSuccess(true);
-        toast.success('Auction created successfully!');
-        setTimeout(() => {
-          navigate(`/auctions/${auction.id}`);
-        }, 2000);
-      })
-      .catch((error) => {
-        toast.error(error.message || 'Failed to create auction');
-      });
+      endTime: formData.endTime
+    }
+
+    const createAuction = async () =>{
+      setLoading(true);
+      try {
+        const res = await api.post('/auctions', auctionData);
+        if (res?.data) {
+          setSuccess(true);
+          toast.success('Auction Created Successfully!!');
+          setTimeout(() => {
+            navigate(`/auctions/${res.data.id}`);
+          }, 2000);
+        }
+       
+      } catch (error) {
+        setError(true);
+        console.log(error);
+        toast.error('Failed to create auction');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    createAuction(); 
+   
   };
   return (
     <div className="container mx-auto px-4 py-4 max-w-3xl">

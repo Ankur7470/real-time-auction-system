@@ -1,11 +1,11 @@
 // src/components/layout/Header.jsx
-import { useState } from 'react';
+/*import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaHammer, FaPlus, FaUser, FaHome, FaBell } from 'react-icons/fa';
 import { logout } from '../slices/authSlice';
 import { markAllNotificationsAsRead } from '../slices/notificationSlice';
-import NotificationList from './NotificationList';
+//import NotificationList from './NotificationList';
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -113,4 +113,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default Header;*/

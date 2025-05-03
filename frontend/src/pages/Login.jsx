@@ -1,51 +1,48 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { FaLock, FaUser } from 'react-icons/fa';
-import { toast } from 'react-toastify';
-import { clearError, login } from '../slices/authSlice';
+// import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
+  const { login } = useAuth();
 
-  // Get redirect path from location state or default to dashboard
+  // // Get redirect path from location state or default to dashboard
   const from = location.state?.from || '/dashboard';
-
-  // Clear error when component unmounts
-  useEffect(() => {
-    return () => {
-      dispatch(clearError());
-    };
-  }, [dispatch]);
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!username || !password) {
-      toast.error('Please enter both username and password');
+      setError('Please enter both username and password');
       return;
     }
-
-    dispatch(login({ username, password }))
-      .unwrap()
-      .then(() => {
-        toast.success('Login successful');
+    
+    setError('');
+    setLoading(true);
+    
+    try {
+      const success = await login(username, password);
+      
+      if (success) {
+        // navigate('/');
         navigate(from, { replace: true });
-      })
-      .catch(() => {
-        // Error is handled by the reducer and displayed in the component
-      });
+      } else {
+        setError('Invalid username or password');
+      }
+    } catch (err) {
+      setError('An error occurred during login');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

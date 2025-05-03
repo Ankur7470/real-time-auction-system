@@ -1,15 +1,29 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchAuctions } from '../slices/auctionSlice';
+import { useEffect, useState } from 'react';
 import AuctionCard from '../components/AuctionCard';
+import api from '../services/axiosConfig';
 
 const AuctionList = () => {
-  const dispatch = useDispatch();
-  const { auctions, loading, error } = useSelector((state) => state.auctions);
+
+  const [auctions, setAuctions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    dispatch(fetchAuctions());
-  }, [dispatch]);
+    const fetchAuctions = async () => {
+      try {
+        const response = await api.get(`/auctions`);
+        setAuctions(response.data);
+      } catch (error) {
+        // toast.error('Failed to load auction details');
+        console.error(error);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchAuctions();
+  }, []);
 
   return (
     <div>

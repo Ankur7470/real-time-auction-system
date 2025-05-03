@@ -35,10 +35,11 @@ public class AuctionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Auction> getAuctionById(@PathVariable Long id) {
+    public ResponseEntity<AuctionDto> getAuctionById(@PathVariable Long id) {
         log.info("Fetching auction with id: {}", id);
         return ResponseEntity.ok(auctionService.getAuctionById(id));
     }
+
 
     @PostMapping
     public ResponseEntity<AuctionDto> createAuction(

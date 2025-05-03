@@ -26,6 +26,8 @@ public class Bid {
     @NotNull
     private Long userId;
 
+    private String username;
+
     @NotNull
     @Positive
     private BigDecimal amount;

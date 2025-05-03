@@ -1,29 +1,19 @@
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+// components/ProtectedRoute.js
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
-  useEffect(() => {
-    if (!isAuthenticated && !loading) {
-      toast.error('Please log in to access this page');
-    }
-  }, [isAuthenticated, loading]);
-
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-        Loading...
-      </div>
-    );
+    return <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>;
   }
 
   if (!isAuthenticated) {
-    // Redirect to login page with return URL
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <Outlet />;

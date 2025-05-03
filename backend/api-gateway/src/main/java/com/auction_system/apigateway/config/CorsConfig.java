@@ -1,4 +1,3 @@
-// src/main/java/com/auction_system/apigateway/config/CorsConfig.java
 package com.auction_system.apigateway.config;
 
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,17 @@ public class CorsConfig {
         corsConfig.addAllowedOriginPattern("http://localhost:5173");
         corsConfig.addAllowedMethod("*");
         corsConfig.addAllowedHeader("*");
+        corsConfig.addExposedHeader("Authorization"); // Important for WebSocket auth
         corsConfig.setAllowCredentials(true);
+        corsConfig.setMaxAge(3600L); // Cache OPTIONS preflight for 1 hour
+
+        // Special WebSocket headers
+        corsConfig.addAllowedHeader("Upgrade");
+        corsConfig.addAllowedHeader("Connection");
+        corsConfig.addAllowedHeader("Sec-WebSocket-Version");
+        corsConfig.addAllowedHeader("Sec-WebSocket-Key");
+        corsConfig.addAllowedHeader("Sec-WebSocket-Extensions");
+        corsConfig.addAllowedHeader("Sec-WebSocket-Protocol");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);

@@ -113,4 +113,17 @@ public class AuthService {
     }
 
 
+    public ResponseEntity<?> getUser(String token) {
+        try {
+            if (!jwtHelper.validateJwtToken(token)) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid token"));
+            }
+
+            String username = jwtHelper.getUserNameFromJwtToken(token);
+            return ResponseEntity.ok(username);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid token"));
+        }
+    }
 }

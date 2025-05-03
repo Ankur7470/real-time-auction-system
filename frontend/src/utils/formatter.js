@@ -2,7 +2,7 @@ import moment from 'moment';
 
 export const formatCurrency = (amount) => {
 if (amount === undefined || amount === null) return '$0.00';
-return $${parseFloat(amount).toFixed(2)};
+return $${parseFloat(amount).toFixed(2)}; ///////////////
 };
 
 export const formatDate = (date) => {

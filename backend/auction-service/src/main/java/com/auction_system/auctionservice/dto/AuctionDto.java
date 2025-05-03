@@ -49,3 +49,4 @@ public class AuctionDto {
 
     private LocalDateTime updatedAt;
 }
+

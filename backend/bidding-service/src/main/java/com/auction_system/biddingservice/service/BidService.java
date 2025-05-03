@@ -7,6 +7,8 @@ import com.auction_system.biddingservice.dto.*;
 import com.auction_system.biddingservice.entity.Bid;
 import com.auction_system.biddingservice.exception.BidException;
 import com.auction_system.biddingservice.exception.BidNotFoundException;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import com.auction_system.biddingservice.repo.BidRepository;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +37,8 @@ public class BidService {
     @Autowired
     private AuctionClient auctionClient;
 
-//    @Autowired
-//    private NotificationService notificationClient;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public List<BidDTO> getBidsByAuctionId(Long auctionId) {
         List<Bid> bids = bidRepository.findByAuctionIdOrderByTimestampDesc(auctionId);
@@ -53,16 +55,16 @@ public class BidService {
     }
 
     @Transactional
-    public Bid placeBid(BidDTO bidDTO) {
-        try {
+    public BidResponse placeBid(Bid bid) {
+
             // 1. Validate bid
-            validateBid(bidDTO);
+            validateBid(bid);
 
             // 2. Call auction service
             ResponseEntity<AuctionDTO> response = auctionClient.placeBid(
-                    bidDTO.getAuctionId(),
-                    new BidRequest(bidDTO.getAmount()),
-                    bidDTO.getUserId()
+                    bid.getAuctionId(),
+                    new BidRequest(bid.getAmount()),
+                    bid.getUserId()
             );
 
             if (!response.getStatusCode().is2xxSuccessful()) {
@@ -70,31 +72,33 @@ public class BidService {
             }
 
             // 3. Update current price
-            ResponseEntity<Void> priceResponse = auctionClient.updateCurrentPrice(
-                    bidDTO.getAuctionId(),
-                    bidDTO.getAmount()
-            );
-
-            if (!priceResponse.getStatusCode().is2xxSuccessful()) {
-                log.warn("Failed to update current price for auction {}", bidDTO.getAuctionId());
-            }
+//            ResponseEntity<Void> priceResponse = auctionClient.updateCurrentPrice(
+//                    bid.getAuctionId(),
+//                    bid.getAmount()
+//            );
+//
+//            if (!priceResponse.getStatusCode().is2xxSuccessful()) {
+//                log.warn("Failed to update current price for auction {}", bid.getAuctionId());
+//            }
 
             // 4. Save bid
-            Bid bid = new Bid();
-            bid.setAuctionId(bidDTO.getAuctionId());
-            bid.setUserId(bidDTO.getUserId());
-            bid.setAmount(bidDTO.getAmount());
-            bid.setTimestamp(LocalDateTime.now());
+            Bid newbid = new Bid();
+            newbid.setAuctionId(bid.getAuctionId());
+            newbid.setUserId(bid.getUserId());
+            newbid.setAmount(bid.getAmount());
+            newbid.setTimestamp(LocalDateTime.now());
+            newbid.setUsername(bid.getUsername());
 
-            return bidRepository.save(bid);
+            bidRepository.save(newbid);
 
-        } catch (FeignException e) {
-            log.error("Feign client error: {}", e.contentUTF8());
-            throw new BidException("Failed to communicate with auction service: " + e.contentUTF8());
-        }
+            List<Bid> leaderboard = bidRepository.findTopBidsByAuctionIdOrderByAmountDesc(bid.getAuctionId(), 10);
+
+//            messagingTemplate.convertAndSend("/topic/auction/" + bid.getAuctionId(), leaderboard);
+
+            return new BidResponse(true, "Bid placed successfully", leaderboard);
     }
 
-    private void validateBid(BidDTO bidDTO) {
+    private void validateBid(Bid bidDTO) {
         try {
             AuctionDTO auction = auctionClient.getAuctionById(bidDTO.getAuctionId());
 
@@ -115,6 +119,14 @@ public class BidService {
         }
     }
 
+    public List<Bid> getLeaderboard(Long auctionId) {
+        return bidRepository.findTopBidsByAuctionIdOrderByAmountDesc(auctionId, 10);
+    }
+
+    public List<Bid> getUserBids(String username) {
+        return bidRepository.findByUsernameOrderByTimestampDesc(username);
+    }
+
     private BidDTO convertToDTO(Bid bid) {
         BidDTO dto = new BidDTO();
         dto.setId(bid.getId());
@@ -133,4 +145,8 @@ public class BidService {
         return dto;
     }
 
+    public void broadcastLeaderboard(Long auctionId) {
+        List<Bid> leaderboard = getLeaderboard(auctionId);
+        messagingTemplate.convertAndSend("/topic/auction/" + auctionId, leaderboard);
+    }
 }

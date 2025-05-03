@@ -3,86 +3,57 @@ package com.auction_system.biddingservice.controller;
 import com.auction_system.biddingservice.client.AuctionClient;
 import com.auction_system.biddingservice.dto.BidDTO;
 import com.auction_system.biddingservice.dto.AuctionDTO;
+import com.auction_system.biddingservice.dto.BidResponse;
 import com.auction_system.biddingservice.entity.Bid;
+import com.auction_system.biddingservice.exception.BidException;
 import com.auction_system.biddingservice.service.BidService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.stereotype.Controller;
 
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 public class WebSocketController {
 
-//    private static final Logger log = LoggerFactory.getLogger(WebSocketController.class);
-
     @Autowired
-    private BidService bidService;
-
-    @Autowired
-    private AuctionClient auctionClient;
+    BidService bidService;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/bid")
-    public void handleBid(@Payload BidDTO bidDto) {
-        try {
-            // Process the bid
-            Bid bid = bidService.placeBid(bidDto);
+//    @SendTo("/topic/auction/{id}") // Alternative to manual broadcast //here added # bid.
+    public void placeBid(@Payload @Valid Bid bid,
+                                SimpMessageHeaderAccessor headerAccessor) {
 
-            // Get updated auction details
-            AuctionDTO auction = auctionClient.getAuctionById(bidDto.getAuctionId());
+//        log.info("Received bid: {}", bid);
+        System.out.println("Received bid: {}" + bid.getUserId());
+        System.out.println("Received bid: {}" + bid.getUsername());
 
-            // Prepare success response with all needed data
-            Map<String, Object> response = new HashMap<>();
-            response.put("type", "BID_SUCCESS");
-            response.put("auction", auction);
-            response.put("bid", convertToBidDTO(bid));
-            response.put("timestamp", System.currentTimeMillis());
+//        String username = (String) headerAccessor.getSessionAttributes().get("username");
+//        if (username == null) {
+//            throw new BidException("User not authenticated");
+//        }
 
-            // Broadcast updates to all subscribers
-            messagingTemplate.convertAndSend(
-                    "/topic/auction/" + bidDto.getAuctionId(),
-                    response
-            );
-
-            // Send confirmation to the bidder
-            messagingTemplate.convertAndSendToUser(
-//
-                    "/queue/confirmations",
-                    response
-            );
-
-        } catch (Exception e) {
-//            log.error("Failed to process bid: {}", e.getMessage());
-
-            // Prepare error response
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("type", "BID_ERROR");
-            errorResponse.put("message", e.getMessage());
-            errorResponse.put("timestamp", System.currentTimeMillis());
-//
-//            messagingTemplate.convertAndSendToUser(
-//                    principal.getName(),
-//                    "/queue/errors",
-//                    errorResponse
-//            );
+        // Additional validation
+        if (bid.getUserId() == null) {
+            throw new BidException("User ID is required");
         }
+
+//        bid.setUsername(username);
+        BidResponse response = bidService.placeBid(bid);
+
+        messagingTemplate.convertAndSend(
+                "/topic/auction/" + bid.getAuctionId(),
+                response
+        );
+
     }
 
-    private BidDTO convertToBidDTO(Bid bid) {
-        BidDTO dto = new BidDTO();
-        dto.setId(bid.getId());
-        dto.setAuctionId(bid.getAuctionId());
-        dto.setUserId(bid.getUserId());
-        dto.setAmount(bid.getAmount());
-        dto.setTimestamp(bid.getTimestamp());
-        return dto;
-    }
 }

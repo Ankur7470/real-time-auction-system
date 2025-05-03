@@ -15,10 +15,10 @@ export default defineConfig({
 
       // Proxy WebSocket connections with SockJS support
       '/ws-auction': {
-        target: 'http://localhost:8000',  // Ensure it's pointing to the correct backend
-        ws: true,  // Handle WebSocket upgrades
+        target: 'http://localhost:8000',  
+        ws: true,  
         changeOrigin: true,
-        secure: false,  // Allow insecure connections if necessary
+        secure: false,  
       },
     }
   }

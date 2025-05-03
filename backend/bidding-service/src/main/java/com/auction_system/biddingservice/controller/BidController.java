@@ -1,6 +1,7 @@
 package com.auction_system.biddingservice.controller;
 
 import com.auction_system.biddingservice.dto.BidDTO;
+import com.auction_system.biddingservice.entity.Bid;
 import com.auction_system.biddingservice.service.BidService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,10 @@ public class BidController {
     }
 
     @GetMapping("/auction/{auctionId}")
-    public ResponseEntity<List<BidDTO>> getBidsByAuctionId(@PathVariable Long auctionId) {
+    public ResponseEntity<List<Bid>> getBidsByAuctionId(@PathVariable Long auctionId) {
         log.info("Fetching bids for auction with id: {}", auctionId);
-        return ResponseEntity.ok(bidService.getBidsByAuctionId(auctionId));
+//        return ResponseEntity.ok(bidService.getBidsByAuctionId(auctionId));
+        return ResponseEntity.ok(bidService.getLeaderboard(auctionId));
     }
 
     @GetMapping("/user/{userId}")

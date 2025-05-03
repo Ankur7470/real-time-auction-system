@@ -39,10 +39,10 @@ public class AuctionService {
                 .collect(Collectors.toList());
     }
 
-    public Auction getAuctionById(Long id) {
+    public AuctionDto getAuctionById(Long id) {
         Auction auction = auctionRepository.findById(id)
                 .orElseThrow(() -> new AuctionNotFoundException("Auction not found with id: " + id));
-        return auction;
+        return convertToDTO(auction);
     }
 
     @Transactional
@@ -99,7 +99,7 @@ public class AuctionService {
 
     @Transactional
     public void updateAuctionCurrentPrice(Long auctionId, BigDecimal amount) {
-        Auction auction = getAuctionById(auctionId);
+        Auction auction = convertToAuction(getAuctionById(auctionId));
         auction.setCurrentPrice(amount);
     }
 
@@ -219,5 +219,36 @@ public AuctionDto updateBid(Long id, BigDecimal amount, Long userId) {
         }
 
         return dto;
+    }
+
+    private Auction convertToAuction(AuctionDto dto) {
+        Auction auction = new Auction();
+        auction.setId(dto.getId());
+        auction.setTitle(dto.getTitle());
+        auction.setDescription(dto.getDescription());
+        auction.setStartingPrice(dto.getStartingPrice());
+        auction.setCurrentPrice(dto.getCurrentPrice());
+        auction.setStartTime(dto.getStartTime());
+        auction.setEndTime(dto.getEndTime());
+        auction.setImageUrl(dto.getImageUrl());
+        auction.setCategory(dto.getCategory());
+        auction.setStatus(dto.getStatus());
+        auction.setCreatedAt(dto.getCreatedAt());
+        auction.setUpdatedAt(dto.getUpdatedAt());
+
+        // Set seller ID from the DTO's seller
+        if (dto.getSeller() != null) {
+            auction.setSellerId(dto.getSeller().getId());
+        } else {
+            log.warn("Auction DTO has no seller information");
+            throw new IllegalArgumentException("Seller information is required");
+        }
+
+        // Set winner ID if exists
+        if (dto.getWinner() != null) {
+            auction.setWinnerId(dto.getWinner().getId());
+        }
+
+        return auction;
     }
 }

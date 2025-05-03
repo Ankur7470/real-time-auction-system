@@ -1,7 +1,9 @@
 package com.auction_system.authservice.controller;
 
+import com.auction_system.authservice.model.User;
 import com.auction_system.authservice.payload.request.LoginRequest;
 import com.auction_system.authservice.payload.request.SignupRequest;
+import com.auction_system.authservice.payload.response.MessageResponse;
 import com.auction_system.authservice.repo.UserRepo;
 import com.auction_system.authservice.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +56,15 @@ public ResponseEntity<?> verifyToken(@RequestHeader("Authorization") String auth
      return ResponseEntity.ok(authService.verifyUser(token));
 }
 
+    @GetMapping("/getUser")
+    public ResponseEntity<?> getUser(String token) {
+//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header");
+//        }
 
+//        String token = authHeader.substring(7);
 
+        return authService.getUser(token);
+    }
 }
 
