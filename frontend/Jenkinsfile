@@ -11,6 +11,7 @@ pipeline {
     }
 
     stages {
+
          stage('Checkout') {
             steps {
                 script {
@@ -38,24 +39,30 @@ pipeline {
                 dir('frontend') {
                     script {
                     docker.build("${DOCKER_IMAGE_NAME}", '.')
-                }
-                    // sh "docker build -t $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ."         
+                }       
                 }
             }
         }
-
-
         
-stage('Push Docker Image') {
-    steps {
-        script {
-            docker.withRegistry('', 'DockerHubCred') {
-                sh "docker tag $DOCKER_IMAGE_NAME ankur2k19/$DOCKER_IMAGE_NAME:latest"
-                // sh "docker push ankur2k19/$DOCKER_IMAGE_NAME:${env.BUILD_NUMBER}"
-                sh "docker push ankur2k19/$DOCKER_IMAGE_NAME"
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('', 'DockerHubCred') {
+                        sh "docker tag $DOCKER_IMAGE_NAME ankur2k19/$DOCKER_IMAGE_NAME:latest"
+                        sh "docker push ankur2k19/$DOCKER_IMAGE_NAME"
+                    }
+                }
             }
         }
-    }
-}
+
+        stage('Deploy to Kubernetes via Ansible') {
+            steps {
+                dir('ansible') {
+                    sh '''
+                      ansible-playbook deploy_frontend.yml
+                    '''
+                }
+            }
+        }
     }
 }

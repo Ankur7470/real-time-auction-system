@@ -1,0 +1,14 @@
+- name: Deploy frontend to Kubernetes
+  hosts: localhost
+  tasks:
+    - name: Apply frontend deployment
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        state: present
+        definition: "{{ lookup('file', 'frontend-deployment.yaml') }}"
+
+    - name: Apply frontend service
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        state: present
+        definition: "{{ lookup('file', 'frontend-service.yaml') }}"
