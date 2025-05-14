@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "ankur2k19/auction-system-frontend"
+    }
+
+    triggers {
+        // Triggered via GitHub webhook, no polling
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Ankur7470/real-time-auction-system.git', branch: 'main'
+            }
+        }
+
+        stage('Detect Frontend Changes') {
+            steps {
+                script {
+                    def changes = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^frontend/' || true", returnStdout: true).trim()
+                    if (changes == "") {
+                        echo "No changes in frontend folder. Skipping pipeline."
+                        currentBuild.result = 'SUCCESS'
+                        currentBuild.description = "No frontend changes"
+                        error("No frontend changes")
+                    }
+                }
+            }
+        }
+
+        stage('Build Frontend Docker Image') {
+            steps {
+                dir('frontend') {
+                    sh "docker build -t $IMAGE_NAME:${env.BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $IMAGE_NAME:${BUILD_NUMBER}
+                    '''
+                }
+            }
+        }
+    }
+}
