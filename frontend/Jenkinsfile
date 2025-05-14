@@ -36,8 +36,7 @@ pipeline {
         stage('Build Frontend Docker Image') {
             steps {
                 dir('frontend') {
-                    sh "docker build -t $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ."
-                    // sh "docker images | grep auction-system-frontend"
+                    sh "docker build -t $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ."         
                 }
             }
         }
@@ -47,7 +46,6 @@ pipeline {
 stage('Push Docker Image') {
     steps {
         script {
-            // sh "docker images" // debug
             docker.withRegistry('', 'DockerHubCred') {
                 sh "docker tag $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ankur2k19/$DOCKER_IMAGE_NAME:latest"
                 sh "docker push ankur2k19/$DOCKER_IMAGE_NAME:${env.BUILD_NUMBER}"
