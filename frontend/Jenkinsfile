@@ -36,7 +36,10 @@ pipeline {
         stage('Build Frontend Docker Image') {
             steps {
                 dir('frontend') {
-                    sh "docker build -t $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ."         
+                    script {
+                    docker.build("${DOCKER_IMAGE_NAME}", '.')
+                }
+                    // sh "docker build -t $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ."         
                 }
             }
         }
@@ -48,7 +51,7 @@ stage('Push Docker Image') {
         script {
             docker.withRegistry('', 'DockerHubCred') {
                 sh "docker tag $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ankur2k19/$DOCKER_IMAGE_NAME:latest"
-                sh "docker push ankur2k19/$DOCKER_IMAGE_NAME:${env.BUILD_NUMBER}"
+                // sh "docker push ankur2k19/$DOCKER_IMAGE_NAME:${env.BUILD_NUMBER}"
                 sh "docker push ankur2k19/$DOCKER_IMAGE_NAME:latest"
             }
         }
