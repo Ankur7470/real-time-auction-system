@@ -58,9 +58,7 @@ pipeline {
         stage('Deploy to Kubernetes via Ansible') {
             steps {
                 dir('ansible') {
-                    sh '''
-                      ansible-playbook deploy_frontend.yml
-                    '''
+                    sh 'ansible-playbook deploy_frontend.yml'
                 }
             }
         }
