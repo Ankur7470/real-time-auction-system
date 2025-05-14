@@ -6,7 +6,7 @@ pipeline {
     }
 
     triggers {
-        // Triggered via GitHub webhook, no polling
+        githubPush()
     }
 
     stages {
