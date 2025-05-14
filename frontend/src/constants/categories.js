@@ -1,5 +1,4 @@
-// src/constants/categories.js
-export const CATEGORIES = [
+export const categories = [
     'Electronics',
     'Clothing',
     'Home & Garden',

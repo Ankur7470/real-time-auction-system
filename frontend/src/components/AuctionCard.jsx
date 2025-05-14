@@ -1,9 +1,11 @@
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { FaClock, FaGavel, FaUser } from 'react-icons/fa';
 
 const AuctionCard = ({ auction }) => {
   const navigate = useNavigate();
+  const { isAuthenticated, currentUser } = useAuth();
 
   if (!auction) {
     return null;
@@ -13,11 +15,14 @@ const AuctionCard = ({ auction }) => {
     navigate(`/auctions/${auction.id}`);
   };
 
-  // Safely check if the auction has ended
   const now = new Date();
   const endTime = auction.endTime ? new Date(auction.endTime) : null;
   const isEnded = endTime ? endTime < now : false;
   const status = auction.status || (isEnded ? 'ENDED' : 'ACTIVE');
+  const isOwner = isAuthenticated && currentUser && auction.seller?.email === currentUser.username;
+
+  const currentPrice = auction.currentPrice || auction.startingPrice || 0;
+  const formattedPrice = currentPrice.toFixed(2);
 
   return (
     <div 
@@ -33,7 +38,7 @@ const AuctionCard = ({ auction }) => {
       </div>
 
       <div className="p-4 flex flex-col h-64">
-        <div className="mb-2">
+        <div className="mb-2 flex items-center justify-between">
           <span className={`inline-block px-2 py-1 text-xs rounded-full ${
             status === 'ACTIVE'
               ? 'bg-green-100 text-green-800'
@@ -41,7 +46,9 @@ const AuctionCard = ({ auction }) => {
           }`}>
             {status === 'ACTIVE' ? 'Active' : 'Ended'}
           </span>
-          <span className="text-xs text-gray-500 ml-2">{auction.category}</span>
+          {auction.category && (
+            <span className="text-xs text-gray-500">{auction.category}</span>
+          )}
         </div>
 
         <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-1">
@@ -53,9 +60,18 @@ const AuctionCard = ({ auction }) => {
         </p>
 
         <div className="mt-auto">
-          <div className="flex items-center text-primary font-bold mb-2">
+          <div className="flex items-center justify-between text-primary font-bold mb-2">
+            <div className="flex items-center">
             <FaGavel className="mr-2 text-blue-600" />
-            <span className="text-blue-600">${auction.currentPrice ? auction.currentPrice.toFixed(2) : auction.startingPrice ? auction.startingPrice.toFixed(2) : '0.00'}</span>
+              <span className="text-blue-600">
+                ${formattedPrice}
+              </span>
+            </div>
+            {isOwner && (
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                Your Auction
+              </span>
+            )}
           </div>
 
           <div className="flex items-center text-gray-600 text-sm mb-2">
@@ -69,7 +85,9 @@ const AuctionCard = ({ auction }) => {
 
           <div className="flex items-center text-gray-600 text-sm">
             <FaUser className="mr-2" />
-            <span>{auction.seller?.email || 'Unknown seller'}</span>
+            <span className="truncate">
+              {auction.seller?.email || 'Unknown seller'}
+            </span>
           </div>
         </div>
       </div>

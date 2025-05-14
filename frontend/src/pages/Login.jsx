@@ -1,44 +1,40 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaLock, FaUser } from 'react-icons/fa';
-// import { toast } from 'react-toastify';
+import { FaLock, FaUser, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
 
-  // // Get redirect path from location state or default to dashboard
   const from = location.state?.from || '/dashboard';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!username || !password) {
-      setError('Please enter both username and password');
+      toast.warn('Please enter both username and password');
       return;
     }
-    
-    setError('');
+
     setLoading(true);
-    
+
     try {
       const success = await login(username, password);
-      
+
       if (success) {
-        // navigate('/');
         navigate(from, { replace: true });
       } else {
-        setError('Invalid username or password');
+        toast.error('Invalid username or password')
       }
     } catch (err) {
-      setError('An error occurred during login');
       console.error(err);
     } finally {
       setLoading(false);
@@ -49,12 +45,6 @@ const Login = () => {
     <div className="flex justify-center items-center min-h-[80vh]">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h1>
-
-        {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
-            {error.message || 'Login failed'}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -81,13 +71,24 @@ const Login = () => {
               </div>
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
               />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <FaEyeSlash className="text-gray-400 hover:text-gray-600" />
+                ) : (
+                  <FaEye className="text-gray-400 hover:text-gray-600" />
+                )}
+              </button>
             </div>
           </div>
 

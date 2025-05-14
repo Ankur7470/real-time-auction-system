@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { FaHammer, FaPlus, FaUser, FaHome, FaBell } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-
+import NotificationMenu from './NotificationMenu';
 
 const Layout = () => {
 
@@ -12,7 +12,6 @@ const Layout = () => {
   const { isAuthenticated, logout, currentUser } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
  // const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
-
 
   const handleLogout = () => {
     logout();
@@ -43,7 +42,7 @@ const Layout = () => {
                     <FaHome />
                     <span>Dashboard</span>
                   </Link>
-                  
+                  <NotificationMenu />
                 
                   <div className="relative">
                     <button 
