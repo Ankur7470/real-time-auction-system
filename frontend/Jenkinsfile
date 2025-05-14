@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "ankur2k19/auction-system-frontend"
+        DOCKER_IMAGE_NAME = 'auction-system-frontend'
+        GITHUB_REPO_URL = 'https://github.com/Ankur7470/real-time-auction-system.git'
     }
 
     triggers {
@@ -10,9 +11,11 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+         stage('Checkout') {
             steps {
-                git url: 'https://github.com/Ankur7470/real-time-auction-system.git', branch: 'main'
+                script {
+                    git branch: 'main', url: "${GITHUB_REPO_URL}"
+                }
             }
         }
 
@@ -33,18 +36,18 @@ pipeline {
         stage('Build Frontend Docker Image') {
             steps {
                 dir('frontend') {
-                    sh "docker build -t $IMAGE_NAME:${env.BUILD_NUMBER} ."
+                    sh "docker build -t $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ."
                 }
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'DockerHubCred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push $IMAGE_NAME:${BUILD_NUMBER}
-                    '''
+                script {
+                    docker.withRegistry('', 'DockerHubCred') {
+                        sh 'docker tag auction-system-frontend ankur2k19/auction-system-frontend:latest'
+                        sh 'docker push ankur2k19/auction-system-frontend'
+                    }
                 }
             }
         }
