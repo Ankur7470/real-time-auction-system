@@ -50,9 +50,9 @@ stage('Push Docker Image') {
     steps {
         script {
             docker.withRegistry('', 'DockerHubCred') {
-                sh "docker tag $DOCKER_IMAGE_NAME:${env.BUILD_NUMBER} ankur2k19/$DOCKER_IMAGE_NAME:latest"
+                sh "docker tag $DOCKER_IMAGE_NAME ankur2k19/$DOCKER_IMAGE_NAME:latest"
                 // sh "docker push ankur2k19/$DOCKER_IMAGE_NAME:${env.BUILD_NUMBER}"
-                sh "docker push ankur2k19/$DOCKER_IMAGE_NAME:latest"
+                sh "docker push ankur2k19/$DOCKER_IMAGE_NAME"
             }
         }
     }
