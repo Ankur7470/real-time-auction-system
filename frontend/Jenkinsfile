@@ -5,7 +5,7 @@ pipeline {
         DOCKER_IMAGE_NAME = 'auction-system-frontend'
         GITHUB_REPO_URL = 'https://github.com/Ankur7470/real-time-auction-system.git'
     }
-//comment
+
     triggers {
         githubPush()
     }
@@ -34,12 +34,21 @@ pipeline {
             }
         }
 
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'npm ci'
+                    sh 'npm run build'
+                }
+            }
+        }
+
         stage('Build Frontend Docker Image') {
             steps {
                 dir('frontend') {
                     script {
-                    docker.build("${DOCKER_IMAGE_NAME}", '.')
-                }       
+                        docker.build("${DOCKER_IMAGE_NAME}", '.')
+                    }       
                 }
             }
         }
@@ -55,12 +64,15 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes via Ansible') {
+        stage('Ansible Deployment') {
             steps {
-                dir('ansible') {
-                    sh 'ansible-playbook deploy_frontend.yml'
-                }
+                ansiblePlaybook colorized: true,
+                installation: Ansible,
+                inventory: 'inventory',
+                playbook: 'ansible_playbook.yml'
             }
         }
+
+       
     }
 }

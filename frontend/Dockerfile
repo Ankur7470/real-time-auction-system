@@ -1,25 +1,16 @@
-# Build Stage
-FROM node:22-alpine AS build
+FROM node:18
 
+# Create app directory
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+# Install app dependencies
+COPY ./package.json /app
+COPY ./package-lock.json /app
 
-COPY . .
+RUN npm ci
 
-RUN npm run build
+# Bundle app source
+COPY . /app
 
-# Production Stage
-FROM nginx:alpine
-
-# Replace /app/build → /app/dist
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Optional: replace default nginx config for SPA routing
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3000
+CMD [ "npm", "run", "dev"]
