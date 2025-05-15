@@ -65,14 +65,16 @@ pipeline {
         }
         //
         stage('Ansible Deployment') {
+            // steps {
+            //     // ansiblePlaybook colorized: true,
+            //     // installation: 'ansible',
+            //     // inventory: 'inventory',
+            //     // playbook: 'ansible_playbook.yml'
+            // }
             steps {
-                ansiblePlaybook colorized: true,
-                installation: 'ansible',
-                inventory: 'inventory',
-                playbook: 'ansible_playbook.yml'
+                sh 'ansible-playbook ansible_playbook.yml -i inventory'
             }
         }
 
-       
     }
 }
