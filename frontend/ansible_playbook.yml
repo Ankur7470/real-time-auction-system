@@ -1,0 +1,41 @@
+---
+- name: Deployment on K8 cluster
+  hosts: localhost
+  remote_user: ankur
+
+  tasks:
+    - name: Check minikube status
+      command: minikube status
+      register: minikube_status
+      changed_when: false
+      failed_when: false
+
+    - name: Start minikube
+      become: false
+      command: minikube Start
+      when: "'Running' not in minikube_status.stdout"
+
+    - name: Appying K8s Command in Repository
+      shell: |
+        cd ./k8s/
+        kubectl delete -f .
+        kubectl apply -f .
+      changed_when: false
+      failed_when: false 
+
+    # - name: delete existing frontend deployment
+    #   kubernetes.core.k8s:
+    #     definition: "{{ lookup('file', './k8s-deploy-frontend.yaml') | from_yaml }}"
+    #     state: absent
+    # - name: create frontend deployment
+    #   kubernetes.core.k8s:
+    #     definition: "{{ lookup('file', './k8s-deploy-frontend.yaml') | from_yaml }}"
+    #     state: present
+    # - name: delete frontend service
+    #   kubernetes.core.k8s:
+    #     definition: "{{ lookup('file', './k8s-service-frontend.yaml') | from_yaml }}" 
+    #     state: absent
+    # - name: create frontend service
+    #   kubernetes.core.k8s:
+    #     definition: "{{ lookup('file', './k8s-service-frontend.yaml') | from_yaml }}" 
+    #     state: present
