@@ -69,12 +69,16 @@ pipeline {
         stage('Ansible Deployment') {
             steps {
                 dir('frontend') {
-                    script {
-                        ansiblePlaybook(
-                            playbook: 'ansible_playbook.yml',
-                            inventory: 'inventory'
-                        )
+                    script{
+                        sh 'ansible-playbook ansible_playbook.yml -i inventory'
                     }
+                    
+                    // script {
+                    //     ansiblePlaybook(
+                    //         playbook: 'ansible_playbook.yml',
+                    //         inventory: 'inventory'
+                    //     )
+                    // }
                 }
             }
         }
