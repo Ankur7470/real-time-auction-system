@@ -64,10 +64,13 @@ pipeline {
             }
         }
 
-        stage('Ansible Deployment') {
+        stage('Deploy to K8s with Ansible') {
             steps {
                 dir('frontend') {
-                    sh 'ansible-playbook ansible_playbook.yml -i inventory'
+                    ansiblePlaybook(
+                        playbook: 'ansible_playbook.yml',
+                        inventory: 'inventory'
+                    )
                 }
             }
         }
