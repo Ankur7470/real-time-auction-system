@@ -63,13 +63,6 @@ pipeline {
                 }
             }
         }
-        
-
-        // stage('Start Minikube') {
-        //     steps {
-        //         sh 'minikube start --driver=docker || echo "Minikube already started"'
-        //     }
-        // }
 
         stage('Ansible Deployment') {
             steps {
