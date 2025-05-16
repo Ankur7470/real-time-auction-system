@@ -63,7 +63,7 @@ pipeline {
                 }
             }
         }
-        //
+        
         stage('Ansible Deployment') {
             steps {
                 dir('frontend') {
