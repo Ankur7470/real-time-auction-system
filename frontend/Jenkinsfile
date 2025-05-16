@@ -66,23 +66,36 @@ pipeline {
             }
         }
         
-        stage('Ansible Deployment') {
-            steps {
-                dir('frontend') {
-                    script{
-                        sh 'ansible-playbook ansible_playbook.yml -i inventory'
-                    }
+        // stage('Ansible Deployment') {
+        //     steps {
+        //         dir('frontend') {
+        //             script{
+        //                 sh 'ansible-playbook ansible_playbook.yml -i inventory'
+        //             }
                     
-                    // script {
-                    //     ansiblePlaybook(
-                    //         playbook: 'ansible_playbook.yml',
-                    //         inventory: 'inventory'
-                    //     )
-                    // }
-                }
+        //             // script {
+        //             //     ansiblePlaybook(
+        //             //         playbook: 'ansible_playbook.yml',
+        //             //         inventory: 'inventory'
+        //             //     )
+        //             // }
+        //         }
+        //     }
+        // }
+
+        stage('Start Minikube') {
+            steps {
+                sh 'minikube start --driver=docker || echo "Minikube already started"'
             }
         }
 
+        stage('Ansible Deployment') {
+            steps {
+                dir('frontend') {
+                    sh 'ansible-playbook ansible_playbook.yml -i inventory'
+                }
+            }
+        }
     }
     
 }
