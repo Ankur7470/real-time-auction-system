@@ -1,6 +1,6 @@
 package com.auction_system.biddingservice.dto;
 
-import com.auction_system.biddingservice.entity.Bid;
+import com.auction_system.biddingservice.model.Bid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

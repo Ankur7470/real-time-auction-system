@@ -1,4 +1,4 @@
-package com.auction_system.apigateway.config;
+package com.auction_system.apigateway;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

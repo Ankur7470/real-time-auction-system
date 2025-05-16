@@ -1,6 +1,5 @@
 package com.auction_system.biddingservice.client;
 
-//import com.auction_system.common.config.FeignClientConfig;
 import com.auction_system.biddingservice.dto.AuctionDTO;
 import com.auction_system.biddingservice.dto.BidRequest;
 import org.springframework.cloud.openfeign.FeignClient;

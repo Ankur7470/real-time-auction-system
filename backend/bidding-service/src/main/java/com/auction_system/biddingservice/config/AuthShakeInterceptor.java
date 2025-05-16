@@ -1,6 +1,5 @@
 package com.auction_system.biddingservice.config;
 
-import com.auction_system.biddingservice.client.UserClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;

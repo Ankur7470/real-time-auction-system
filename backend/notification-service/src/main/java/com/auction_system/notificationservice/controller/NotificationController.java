@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/notifications")
+//@RequestMapping("/api/notifications")
 @Slf4j
 public class NotificationController {
 

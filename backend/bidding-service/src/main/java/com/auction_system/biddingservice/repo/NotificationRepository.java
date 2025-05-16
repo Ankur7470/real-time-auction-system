@@ -1,6 +1,6 @@
 package com.auction_system.biddingservice.repo;
 
-import com.auction_system.biddingservice.entity.Notification;
+import com.auction_system.biddingservice.model.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

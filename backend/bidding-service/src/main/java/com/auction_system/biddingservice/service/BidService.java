@@ -4,10 +4,10 @@ import com.auction_system.biddingservice.client.AuctionClient;
 //import com.auction_system.biddingservice.client.NotificationClient;
 import com.auction_system.biddingservice.client.UserClient;
 import com.auction_system.biddingservice.dto.*;
-import com.auction_system.biddingservice.entity.Bid;
+import com.auction_system.biddingservice.model.Bid;
 import com.auction_system.biddingservice.exception.BidException;
-import com.auction_system.biddingservice.exception.BidNotFoundException;
-import jakarta.validation.constraints.NotNull;
+import com.auction_system.biddingservice.model.Notification;
+import com.auction_system.biddingservice.repo.NotificationRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import com.auction_system.biddingservice.repo.BidRepository;
 import feign.FeignException;
@@ -18,10 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,14 +37,17 @@ public class BidService {
     private AuctionClient auctionClient;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    public List<BidDTO> getBidsByAuctionId(Long auctionId) {
-        List<Bid> bids = bidRepository.findByAuctionIdOrderByTimestampDesc(auctionId);
-        return bids.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+//    public List<BidDTO> getBidsByAuctionId(Long auctionId) {
+//        List<Bid> bids = bidRepository.findByAuctionIdOrderByTimestampDesc(auctionId);
+//        return bids.stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
 
     public List<BidDTO> getBidsByUserId(Long userId) {
         List<Bid> bids = bidRepository.findByUserIdOrderByTimestampDesc(userId);
@@ -77,12 +79,8 @@ public class BidService {
 //                    bid.getAuctionId(),
 //                    bid.getAmount()
 //            );
-//
-//            if (!priceResponse.getStatusCode().is2xxSuccessful()) {
-//                log.warn("Failed to update current price for auction {}", bid.getAuctionId());
-//            }
 
-            // 4. Save bid
+            // Save bid
             Bid newbid = new Bid();
             newbid.setAuctionId(bid.getAuctionId());
             newbid.setUserId(bid.getUserId());
@@ -92,9 +90,11 @@ public class BidService {
 
             bidRepository.save(newbid);
 
-            List<Bid> leaderboard = bidRepository.findTopBidsByAuctionIdOrderByAmountDesc(bid.getAuctionId(), 10);
+            AuctionDTO auction = auctionClient.getAuctionById(bid.getAuctionId());
 
-//            messagingTemplate.convertAndSend("/topic/auction/" + bid.getAuctionId(), leaderboard);
+            createNotifications(newbid, auction);
+
+            List<Bid> leaderboard = bidRepository.findTopBidsByAuctionIdOrderByAmountDesc(bid.getAuctionId(), 10);
 
             return new BidResponse(true, "Bid placed successfully", leaderboard);
     }
@@ -159,8 +159,45 @@ public class BidService {
         return dto;
     }
 
-    public void broadcastLeaderboard(Long auctionId) {
-        List<Bid> leaderboard = getLeaderboard(auctionId);
-        messagingTemplate.convertAndSend("/topic/auction/" + auctionId, leaderboard);
+//    public void broadcastLeaderboard(Long auctionId) {
+//        List<Bid> leaderboard = getLeaderboard(auctionId);
+//        messagingTemplate.convertAndSend("/topic/auction/" + auctionId, leaderboard);
+//    }
+
+    private void createNotifications(Bid bid, AuctionDTO auction) {
+        // Notify seller
+        Notification sellerNotification = new Notification();
+        sellerNotification.setUserId(auction.getSeller().getId());
+        sellerNotification.setMessage("New bid of " + bid.getAmount() + " on your auction: " + auction.getTitle());
+        sellerNotification.setAuctionId(bid.getAuctionId());
+        notificationRepository.save(sellerNotification);
+
+        // Notify previous highest bidder if exists
+        Optional<Bid> previousHighest = Optional.ofNullable(bidRepository.findTopByAuctionIdOrderByAmountDesc(bid.getAuctionId()));
+        if (previousHighest.isPresent() && !previousHighest.get().getUserId().equals(bid.getUserId())) {
+            Notification outbidNotification = new Notification();
+            outbidNotification.setUserId(previousHighest.get().getUserId());
+            outbidNotification.setMessage("You've been outbid on auction: " + auction.getTitle());
+            outbidNotification.setAuctionId(bid.getAuctionId());
+            notificationRepository.save(outbidNotification);
+
+            // Send real-time notification
+            messagingTemplate.convertAndSendToUser(
+                    outbidNotification.getUserId().toString(),
+                    "/queue/notifications",
+                    outbidNotification
+            );
+        }
+
+        // Send real-time to seller
+        messagingTemplate.convertAndSendToUser(
+                sellerNotification.getUserId().toString(),
+                "/queue/notifications",
+                sellerNotification
+        );
+    }
+
+    public List<Notification> getUserNotifications(Long userId) {
+        return notificationRepository.findByUserIdOrderByTimestampDesc(userId);
     }
 }

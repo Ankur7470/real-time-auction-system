@@ -23,11 +23,6 @@ public class AuctionController {
     @Autowired
     private AuctionService auctionService;
 
-    @GetMapping("/hello")
-    public String test() {
-        return "Hello World";
-    }
-
     @GetMapping
     public ResponseEntity<List<AuctionDto>> getAllAuctions() {
         log.info("Fetching all active auctions");

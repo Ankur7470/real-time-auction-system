@@ -1,6 +1,6 @@
 package com.auction_system.biddingservice.repo;
 
-import com.auction_system.biddingservice.entity.Bid;
+import com.auction_system.biddingservice.model.Bid;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

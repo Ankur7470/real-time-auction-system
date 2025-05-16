@@ -1,4 +1,4 @@
-package com.auction_system.biddingservice.entity;
+package com.auction_system.biddingservice.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
