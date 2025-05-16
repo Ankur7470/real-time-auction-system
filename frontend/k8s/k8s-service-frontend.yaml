@@ -4,10 +4,11 @@ kind: Service
 metadata:
   name: frontend-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: frontend
   ports:
     - protocol: TCP
       port: 3000
       targetPort: 3000
+      nodePort: 31000   # Minikube friendly

@@ -15,8 +15,8 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: auction-frontend
-        image: ankur2k19/auction-system-frontend:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3000
+        - name: auction-frontend
+          image: ankur2k19/auction-system-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000

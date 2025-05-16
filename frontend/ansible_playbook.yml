@@ -1,7 +1,33 @@
+# ---
+# - name: Deployment on K8 cluster
+#   hosts: localhost
+#   remote_user: ankur
+#   become: false
+
+#   tasks:
+#     - name: Check minikube status
+#       command: minikube status
+#       register: minikube_status
+#       changed_when: false
+#       failed_when: false
+
+#     - name: Start minikube
+#       become: false
+#       command: minikube start
+#       when: "'Running' not in minikube_status.stdout"
+
+#     - name: Appying K8s Command in Repository
+#       shell: |
+#         cd ./k8s/
+#         kubectl delete -f .
+#         kubectl apply -f .
+#       changed_when: false
+#       failed_when: false 
+
 ---
-- name: Deployment on K8 cluster
+- name: Deploy frontend dev to Minikube
   hosts: localhost
-  remote_user: ankur
+  gather_facts: false
   become: false
 
   tasks:
@@ -11,15 +37,12 @@
       changed_when: false
       failed_when: false
 
-    - name: Start minikube
-      become: false
+    - name: Start minikube if not running
       command: minikube start
       when: "'Running' not in minikube_status.stdout"
 
-    - name: Appying K8s Command in Repository
+    - name: Apply Kubernetes manifests
       shell: |
-        cd ./k8s/
-        kubectl delete -f .
+        cd k8s/
+        kubectl delete -f . --ignore-not-found
         kubectl apply -f .
-      changed_when: false
-      failed_when: false 
