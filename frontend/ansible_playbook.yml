@@ -2,6 +2,7 @@
 - name: Deployment on K8 cluster
   hosts: localhost
   remote_user: ankur
+  become: false
 
   tasks:
     - name: Check minikube status
