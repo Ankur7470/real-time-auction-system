@@ -24,10 +24,33 @@
 #       changed_when: false
 #       failed_when: false 
 
+# ---
+# - name: Deploy frontend dev to Minikube
+#   hosts: localhost
+#   gather_facts: false
+#   become: false
+
+#   tasks:
+#     - name: Check minikube status
+#       command: minikube status
+#       register: minikube_status
+#       changed_when: false
+#       failed_when: false
+
+#     - name: Start minikube if not running
+#       command: minikube start
+#       when: "'Running' not in minikube_status.stdout"
+
+#     - name: Apply Kubernetes manifests
+#       shell: |
+#         cd k8s/
+#         kubectl delete -f . --ignore-not-found
+#         kubectl apply -f .
+
 ---
-- name: Deploy frontend dev to Minikube
+- name: Deployment on K8 cluster
   hosts: localhost
-  gather_facts: false
+  remote_user: ankur
   become: false
 
   tasks:
@@ -37,12 +60,24 @@
       changed_when: false
       failed_when: false
 
-    - name: Start minikube if not running
-      command: minikube start
-      when: "'Running' not in minikube_status.stdout"
+    - name: Check if Minikube is broken
+      set_fact:
+        minikube_broken: "{{ ('Running' not in minikube_status.stdout) or ('Stopped' in minikube_status.stdout) or ('SSH' in minikube_status.stderr) }}"
+      when: minikube_status is defined
 
-    - name: Apply Kubernetes manifests
+    - name: Delete existing minikube cluster if broken
+      command: minikube delete
+      when: minikube_broken | default(true)
+      ignore_errors: yes
+
+    - name: Start minikube
+      command: minikube start --driver=docker
+      when: minikube_broken | default(true)
+
+    - name: Applying K8s Command in Repository
       shell: |
-        cd k8s/
-        kubectl delete -f . --ignore-not-found
+        cd ./k8s/
+        kubectl delete -f .
         kubectl apply -f .
+      changed_when: false
+      failed_when: false
