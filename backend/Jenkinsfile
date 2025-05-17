@@ -115,7 +115,7 @@ stage('Build Backend Projects') {
 
          stage('Deploy to K8s with Ansible') {
             steps {
-                dir('frontend') {
+                dir('backend') {
                     sh "ansible-playbook -i ansible/inventory ansible/deploy.yml --vault-password-file ${VAULT_PASSWORD_FILE}"
                 }
             }
