@@ -35,13 +35,19 @@ pipeline {
             }
         }
 
-        stage('Build Backend Projects') {
-            steps {
-                dir('backend') {
+       stage('Build Backend Projects') {
+    steps {
+        script {
+            def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+            for (service in services) {
+                dir("backend/${service}") {
                     sh 'mvn clean package -DskipTests'
                 }
             }
         }
+    }
+}
+
 
         stage('Build and Push Docker Images') {
             steps {
