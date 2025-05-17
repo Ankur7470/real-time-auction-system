@@ -1,0 +1,66 @@
+# Persistent Volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-auction-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-auction
+spec:
+  selector:
+    matchLabels:
+      app: mysql-auction
+  template:
+    metadata:
+      labels:
+        app: mysql-auction
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auction-db-secret
+              key: root-password
+        - name: MYSQL_DATABASE
+          value: auction_db
+        - name: MYSQL_USER
+          value: ankur
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auction-db-secret
+              key: password
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-auction-pvc
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-auction
+spec:
+  selector:
+    app: mysql-auction
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306

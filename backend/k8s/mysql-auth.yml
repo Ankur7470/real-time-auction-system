@@ -1,0 +1,66 @@
+# Persistent Volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-auth-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-auth
+spec:
+  selector:
+    matchLabels:
+      app: mysql-auth
+  template:
+    metadata:
+      labels:
+        app: mysql-auth
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-secret
+              key: root-password
+        - name: MYSQL_DATABASE
+          value: auction_auth_db
+        - name: MYSQL_USER
+          value: ankur
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-secret
+              key: password
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-auth-pvc
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-auth
+spec:
+  selector:
+    app: mysql-auth
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306

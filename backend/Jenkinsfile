@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('DockerHubCred')
+        VAULT_PASSWORD_FILE = 'ansible/vault_pass.txt'
+    }
+
+    triggers {
+        githubPush()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Ankur7470/real-time-auction-system.git'
+            }
+        }
+
+        stage('Detecting Backend Changes') {
+            steps {
+                script {
+                    def changes = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^backend/' || true", returnStdout: true).trim()
+                    if (changes == "") {
+                        echo "No changes in backend folder. Skipping pipeline."
+                        currentBuild.result = 'SUCCESS'
+                        currentBuild.description = "No backend changes"
+                        error("No backend changes")
+                    }
+                }
+            }
+        }
+
+        stage('Build and Push Docker Images') {
+            steps {
+                script {
+                    def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+                    for (service in services) {
+                        dir(service) {
+                            sh "docker build -t ankur2k19/${service}:latest ."
+                            sh "docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}"
+                            sh "docker push ankur2k19/${service}:latest"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                sh 'ansible-playbook -i ansible/inventory ansible/deploy.yml --vault-password-file ${VAULT_PASSWORD_FILE}'
+            }
+        }
+    }
+}

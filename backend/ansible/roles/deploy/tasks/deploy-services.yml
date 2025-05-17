@@ -1,0 +1,48 @@
+---
+- name: Deploy API Gateway
+  k8s:
+    state: present
+    src: ../k8s/api-gateway/deployment.yml
+    namespace: auction-system
+
+- name: Deploy Auth Service
+  k8s:
+    state: present
+    src: ../k8s/auth-service/deployment.yml
+    namespace: auction-system
+
+- name: Deploy Auction Service
+  k8s:
+    state: present
+    src: ../k8s/auction-service/deployment.yml
+    namespace: auction-system
+
+- name: Deploy Bidding Service
+  k8s:
+    state: present
+    src: ../k8s/bidding-service/deployment.yml
+    namespace: auction-system
+
+- name: Deploy HPA for services
+  block:
+    - name: API Gateway HPA
+      k8s:
+        state: present
+        src: ../k8s/api-gateway/hpa.yml
+        namespace: auction-system
+
+    - name: Auth Service HPA
+      k8s:
+        state: present
+        src: ../k8s/auth-service/hpa.yml
+        namespace: auction-system
+  when: "'autoscale' in ansible_run_tags"
+
+- name: Verify deployments
+  k8s_info:
+    kind: Deployment
+    namespace: auction-system
+  register: deployments
+
+- debug:
+    msg: "Current deployments: {{ deployments.resources | map(attribute='metadata.name') | list }}"
