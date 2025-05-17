@@ -65,7 +65,7 @@ pipeline {
                 }
             }
         }
-
+//
         stage('Deploy with Ansible') {
             steps {
                 sh "ansible-playbook -i ansible/inventory ansible/deploy.yml --vault-password-file ${VAULT_PASSWORD_FILE}"
