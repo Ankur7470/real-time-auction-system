@@ -1,8 +1,8 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('DockerHubCred')
+     environment {
+        DOCKER_IMAGE_NAMESPACE = 'ankur2k19'
         VAULT_PASSWORD_FILE = 'ansible/vault_pass.txt'
     }
 
@@ -35,37 +35,78 @@ pipeline {
             }
         }
 
-       stage('Build Backend Projects') {
-    steps {
-        script {
-            def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
-            for (service in services) {
-                dir("backend/${service}") {
-                    sh 'mvn clean package -DskipTests'
-                }
-            }
-        }
-    }
-}
+//        stage('Build Backend Projects') {
+//     steps {
+//         script {
+//             def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+//             for (service in services) {
+//                 dir("backend/${service}") {
+//                     sh 'mvn clean package -DskipTests'
+//                 }
+//             }
+//         }
+//     }
+// }
 
-
-        stage('Build and Push Docker Images') {
+stage('Build Backend Projects') {
             steps {
                 script {
                     def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
-
-                    sh "docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}"
-
                     for (service in services) {
                         dir("backend/${service}") {
-                            sh "docker build -t ankur2k19/${service}:latest ."
-                            sh "docker push ankur2k19/${service}:latest"
+                            sh 'mvn clean package -DskipTests'
                         }
                     }
                 }
             }
         }
-//
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+                    for (service in services) {
+                        dir("backend/${service}") {
+                            docker.build("${DOCKER_IMAGE_NAMESPACE}/${service}")
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Images') {
+            steps {
+                script {
+                    def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+                    docker.withRegistry('', 'DockerHubCred') {
+                        for (service in services) {
+                            sh "docker push ${DOCKER_IMAGE_NAMESPACE}/${service}:latest"
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // stage('Build and Push Docker Images') {
+        //     steps {
+        //         script {
+        //             def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+
+        //             sh "docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}"
+
+        //             for (service in services) {
+        //                 dir("backend/${service}") {
+        //                     sh "docker build -t ankur2k19/${service}:latest ."
+        //                     sh "docker push ankur2k19/${service}:latest"
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        
+
         stage('Deploy with Ansible') {
             steps {
                 sh "ansible-playbook -i ansible/inventory ansible/deploy.yml --vault-password-file ${VAULT_PASSWORD_FILE}"
