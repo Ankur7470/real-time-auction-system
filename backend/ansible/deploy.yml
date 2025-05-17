@@ -1,0 +1,8 @@
+---
+- name: Deploy Auction System Backend
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - secrets.yml
+  roles:
+    - deploy
