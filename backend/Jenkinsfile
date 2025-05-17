@@ -31,14 +31,24 @@ pipeline {
             }
         }
 
+        stage('Build Backend Projects') {
+            steps {
+                dir('backend') {
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+        }
+
         stage('Build and Push Docker Images') {
             steps {
                 script {
                     def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+
+                    sh "docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}"
+
                     for (service in services) {
-                        dir(service) {
+                        dir("backend/${service}") {
                             sh "docker build -t ankur2k19/${service}:latest ."
-                            sh "docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}"
                             sh "docker push ankur2k19/${service}:latest"
                         }
                     }
@@ -48,7 +58,7 @@ pipeline {
 
         stage('Deploy with Ansible') {
             steps {
-                sh 'ansible-playbook -i ansible/inventory ansible/deploy.yml --vault-password-file ${VAULT_PASSWORD_FILE}'
+                sh "ansible-playbook -i ansible/inventory ansible/deploy.yml --vault-password-file ${VAULT_PASSWORD_FILE}"
             }
         }
     }
