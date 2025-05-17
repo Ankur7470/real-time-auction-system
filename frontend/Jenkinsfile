@@ -12,23 +12,29 @@ pipeline {
 
     stages {
 
-         stage('Checkout') {
+        stage('Checkout') {
             steps {
-                script {
-                    git branch: 'main', url: "${GITHUB_REPO_URL}"
-                }
+                git branch: 'main', url: "${GITHUB_REPO_URL}"
             }
         }
 
-        stage('Detecting Frontend Changes') {
+        stage('Detect Frontend Changes') {
             steps {
                 script {
-                    def changes = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^frontend/' || true", returnStdout: true).trim()
+                    def changes = sh(
+                        script: "git diff --name-only HEAD~1 HEAD | grep '^frontend/' || true",
+                        returnStdout: true
+                    ).trim()
+
                     if (changes == "") {
-                        echo "No changes in frontend folder. Skipping pipeline."
-                        currentBuild.result = 'SUCCESS'
+                        echo "No changes in frontend folder. Skipping the pipeline."
                         currentBuild.description = "No frontend changes"
-                        error("No frontend changes")
+                        // Set build result to NOT_BUILT and exit without error
+                        currentBuild.result = 'NOT_BUILT'
+                        // Use `return` to exit cleanly instead of throwing an error
+                        return
+                    } else {
+                        echo "Changes detected in frontend folder. Proceeding with build."
                     }
                 }
             }
@@ -37,7 +43,6 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'npm ci'
                     sh 'npm run build'
                 }
             }
@@ -48,11 +53,11 @@ pipeline {
                 dir('frontend') {
                     script {
                         docker.build("${DOCKER_IMAGE_NAME}", '.')
-                    }       
+                    }
                 }
             }
         }
-        
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -75,5 +80,22 @@ pipeline {
             }
         }
     }
-    
+
+    post {
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+        aborted {
+            echo 'Pipeline was aborted.'
+        }
+        notBuilt {
+            echo 'Pipeline skipped as there were no changes in the frontend.'
+        }
+        always {
+            echo 'Pipeline finished execution.'
+        }
+    }
 }
