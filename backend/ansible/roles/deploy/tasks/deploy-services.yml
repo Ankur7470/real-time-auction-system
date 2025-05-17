@@ -17,7 +17,7 @@
   kubernetes.core.k8s:
     kubeconfig: ~/.kube/config
     state: present
-    src: ../k8s/auction-service/deployment.yml
+    src: ../k8s/auction-service/deployment.yaml
     namespace: auction-system
 
 - name: Deploy Bidding Service
