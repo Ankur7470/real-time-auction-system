@@ -15,21 +15,16 @@
           metadata:
             name: auction-system
 
+    - name: Wait for namespace to be available
+      pause:
+        seconds: 5
+
     - name: Apply Kubernetes manifests
       shell: |
         cd k8s/
         kubectl delete -f . --ignore-not-found
         kubectl apply -f .
 
-    # - name: Apply Frontend Service
-    #   kubernetes.core.k8s:
-    #     state: present
-    #     src: ../k8s/frontend-service.yml
-    #     namespace: auction-system
+   
 
-    # - name: Apply Frontend Ingress (Optional)
-    #   kubernetes.core.k8s:
-    #     state: present
-    #     src: ../k8s/frontend-ingress.yml
-    #     namespace: auction-system
 
