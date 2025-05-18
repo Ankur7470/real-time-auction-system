@@ -69,7 +69,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to K8s with Ansible') {
+        stage('Deploy to K8s with Ansible Playbook') {
             steps {
                 dir('frontend') {
                     ansiblePlaybook(

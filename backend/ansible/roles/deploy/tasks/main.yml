@@ -39,7 +39,7 @@
         state: present
         src: ../k8s/mysql-bidding.yml
         namespace: auction-system
-  when: "'database' in ansible_run_tags"
+  # when: "'database' in ansible_run_tags"
 
 - name: Deploy Eureka Server
   kubernetes.core.k8s:

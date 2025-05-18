@@ -4,3 +4,4 @@ metadata:
   name: auction-system
   labels:
     app: auction-system
+

@@ -1,4 +1,4 @@
-# Persistent Volume
+# PVC
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,7 +9,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-
+---
 # Deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -25,33 +25,33 @@ spec:
         app: mysql-bidding
     spec:
       containers:
-      - name: mysql
-        image: mysql:8.0
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: bidding-db-secret
-              key: root-password
-        - name: MYSQL_DATABASE
-          value: auction_bidding_db
-        - name: MYSQL_USER
-          value: ankur
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: bidding-db-secret
-              key: password
-        ports:
-        - containerPort: 3306
-        volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bidding-service-secrets
+                  key: datasource-password
+            - name: MYSQL_DATABASE
+              value: auction_bidding_db
+            - name: MYSQL_USER
+              value: ankur
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bidding-service-secrets
+                  key: datasource-password
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
       volumes:
-      - name: mysql-persistent-storage
-        persistentVolumeClaim:
-          claimName: mysql-bidding-pvc
-
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-bidding-pvc
+---
 # Service
 apiVersion: v1
 kind: Service
