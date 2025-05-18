@@ -24,12 +24,20 @@ pipeline {
         stage('Detecting Backend Changes') {
             steps {
                 script {
-                    def changes = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^backend/' || true", returnStdout: true).trim()
-                    if (changes == "") {
-                        echo "No changes in backend folder. Skipping pipeline."
-                        currentBuild.result = 'SUCCESS'
-                        currentBuild.description = "No backend changes"
-                        error("No backend changes")
+                    def changes = sh(
+                        script: "git diff --name-only HEAD~1 HEAD | grep '^backend/' || true",
+                        returnStdout: true
+                    ).trim()
+                    // def changes = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^backend/' || true", returnStdout: true).trim()
+                     if (changes == "") {
+                        echo "No changes in frontend folder. Skipping the pipeline."
+                        currentBuild.description = "No backendend changes"
+                        // Set build result to NOT_BUILT and exit without error
+                        currentBuild.result = 'NOT_BUILT'
+                        // Use `return` to exit cleanly instead of throwing an error
+                        return
+                    } else {
+                        echo "Changes detected in backend folder. Proceeding with build."
                     }
                 }
             }
