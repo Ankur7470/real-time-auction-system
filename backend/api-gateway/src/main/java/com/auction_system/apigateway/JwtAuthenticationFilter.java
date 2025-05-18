@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
-    @Value("${auction.app.jwtSecret}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     private final List<String> openApiEndpoints = List.of(
