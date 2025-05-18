@@ -21,3 +21,15 @@
         kubectl delete -f . --ignore-not-found
         kubectl apply -f .
 
+    # - name: Apply Frontend Service
+    #   kubernetes.core.k8s:
+    #     state: present
+    #     src: ../k8s/frontend-service.yml
+    #     namespace: auction-system
+
+    # - name: Apply Frontend Ingress (Optional)
+    #   kubernetes.core.k8s:
+    #     state: present
+    #     src: ../k8s/frontend-ingress.yml
+    #     namespace: auction-system
+
