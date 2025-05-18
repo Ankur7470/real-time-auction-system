@@ -7,6 +7,12 @@ spec:
   template:
     metadata: { labels: { app: bidding-service } }
     spec:
+      template:
+        spec:
+          initContainers:
+          - name: wait-for-db
+            image: busybox
+            command: ['sh', '-c', 'until nc -z mysql-bidding-svc 3306; do echo "Waiting for DB"; sleep 2; done']
       containers:
       - name: bidding-service
         image: ankur2k19/bidding-service:latest
@@ -22,9 +28,16 @@ spec:
           valueFrom:
             secretKeyRef: { name: bidding-service-secrets, key: datasource-password }
         readinessProbe:
-          httpGet: { path: /actuator/health, port: 8084 }
-          initialDelaySeconds: 15
-          periodSeconds: 5
+          httpGet:
+            path: /actuator/health
+            port: 8084
+          initialDelaySeconds: 45  # Increased from 15
+          periodSeconds: 10
+          failureThreshold: 3
+        # readinessProbe:
+        #   httpGet: { path: /actuator/health, port: 8084 }
+        #   initialDelaySeconds: 15
+        #   periodSeconds: 5
         livenessProbe:
           httpGet: { path: /actuator/health, port: 8084 }
           initialDelaySeconds: 30

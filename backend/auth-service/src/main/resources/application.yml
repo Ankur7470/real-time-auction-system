@@ -6,8 +6,8 @@ spring:
     name: auth-service
   datasource:
     url: jdbc:mysql://mysql-auth-svc:3306/auction_auth_db?createDatabaseIfNotExist=true
-    # username: ankur
-    # password: Ankur@2k24
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -28,6 +28,7 @@ eureka:
     preferIpAddress: true
 
 jwt:
+  secret: ${JWT_SECRET}
   # secret: auctionSecretKey123456789012345678901234567890
   expirationMs: 86400000
 

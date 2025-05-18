@@ -7,6 +7,12 @@ spec:
   template:
     metadata: { labels: { app: auction-service } }
     spec:
+      template:
+        spec:
+          initContainers:
+          - name: wait-for-db
+            image: busybox
+            command: ['sh', '-c', 'until nc -z mysql-auction-svc 3306; do echo "Waiting for DB"; sleep 2; done']
       containers:
       - name: auction-service
         image: ankur2k19/auction-service:latest
@@ -23,8 +29,9 @@ spec:
             secretKeyRef: { name: auction-service-secrets, key: datasource-password }
         readinessProbe:
           httpGet: { path: /actuator/health, port: 8083 }
-          initialDelaySeconds: 15
-          periodSeconds: 5
+          initialDelaySeconds: 45
+          periodSeconds: 10
+          failureThreshold: 3
         livenessProbe:
           httpGet: { path: /actuator/health, port: 8083 }
           initialDelaySeconds: 30

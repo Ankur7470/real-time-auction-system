@@ -5,7 +5,9 @@ spring:
   application:
     name: auction-service
   datasource:
-    url: jdbc:mysql://mysql-auction-svc:3306/auction_service_db?createDatabaseIfNotExist=true
+    url: jdbc:mysql://mysql-auction-svc:3306/auction_db?createDatabaseIfNotExist=true
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     # username: ankur
     # password: Ankur@2k24
     driver-class-name: com.mysql.cj.jdbc.Driver

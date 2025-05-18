@@ -5,9 +5,9 @@ spring:
   application:
     name: bidding-service
   datasource:
-    url: jdbc:mysql://mysql-auth-svc:3306/auction_bidding_db?createDatabaseIfNotExist=true
-    username: ankur
-    password: Ankur@2k24
+    url: jdbc:mysql://mysql-bidding-svc:3306/auction_bidding_db?createDatabaseIfNotExist=true
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -21,7 +21,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
   instance:

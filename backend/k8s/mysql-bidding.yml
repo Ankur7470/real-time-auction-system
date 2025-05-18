@@ -21,7 +21,7 @@ spec:
         image: mysql:5.7
         env:
         - name: MYSQL_DATABASE    
-          value: biddingdb
+          value: auction_bidding_db
         - name: MYSQL_USER        
           valueFrom:
             secretKeyRef: { name: bidding-service-secrets, key: datasource-username }
@@ -32,6 +32,19 @@ spec:
           value: rootpass
         ports: [{ containerPort: 3306, name: mysql }]
         volumeMounts: [{ name: mysql-data, mountPath: /var/lib/mysql }]
+
+        readinessProbe:
+          exec:
+            command:
+            - mysql
+            - -h127.0.0.1
+            - -uroot
+            - -prootpass
+            - -e
+            - "SELECT 1"
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          
   volumeClaimTemplates:
   - metadata: { name: mysql-data }
     spec:
