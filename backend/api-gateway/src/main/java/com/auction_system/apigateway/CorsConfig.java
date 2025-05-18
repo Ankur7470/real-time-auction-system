@@ -11,7 +11,8 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOriginPattern("http://localhost:5173");
+        corsConfig.addAllowedOriginPattern("http://192.168.49.2:31000");
+        // corsConfig.addAllowedOriginPattern("http://localhost:5173");
         corsConfig.addAllowedMethod("*");
         corsConfig.addAllowedHeader("*");
         corsConfig.addExposedHeader("Authorization"); // Important for WebSocket auth

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useRef, useEffect } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useAuth } from './AuthContext';
+const API_URL = import.meta.env.VITE_API_URL
 
 const WebSocketContext = createContext(null);
 
@@ -11,7 +12,7 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && !stompClient.current) {
-      const socket = new SockJS('/ws-auction');
+      const socket = new SockJS(`${API_URL}/ws-auction`);
       stompClient.current = new Client({
         webSocketFactory: () => socket,
         connectHeaders: {

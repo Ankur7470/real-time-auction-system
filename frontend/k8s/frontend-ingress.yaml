@@ -6,8 +6,13 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - frontend.auction.com
+    secretName: frontend-tls
   rules:
-  - host: frontend.auction.com   # Update with your desired domain
+  - host: frontend.auction.com
     http:
       paths:
       - path: /
