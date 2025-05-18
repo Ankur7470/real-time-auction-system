@@ -19,7 +19,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setError('');
+   // setError('');
     setLoading(true);
 
     // Basic validation

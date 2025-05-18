@@ -1,11 +1,12 @@
 server:
   port: 8082
 
-sspring:
+spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:mysql://mysql-auth.auction-system.svc.cluster.local:3306/auction_auth_db?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/auction_auth_db?createDatabaseIfNotExist=true
+#    url: jdbc:mysql://mysql-auth.auction-system.svc.cluster.local:3306/auction_auth_db?createDatabaseIfNotExist=true
     username: ankur
     password: Ankur@2k24
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -21,7 +22,8 @@ sspring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-server.auction-system.svc.cluster.local:8761/eureka
+      defaultZone: http://localhost:8761/eureka/
+#      defaultZone: http://eureka-server.auction-system.svc.cluster.local:8761/eureka
     register-with-eureka: true
     fetch-registry: true
   instance:

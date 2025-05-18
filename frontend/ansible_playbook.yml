@@ -6,6 +6,15 @@
 
   tasks:
 
+    - name: Create namespace
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: auction-system
+
     - name: Apply Kubernetes manifests
       shell: |
         cd k8s/
