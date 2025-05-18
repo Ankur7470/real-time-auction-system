@@ -1,66 +1,46 @@
-# PVC
 apiVersion: v1
 kind: PersistentVolumeClaim
-metadata:
-  name: mysql-auth-pvc
+metadata: { name: auth-db-pvc, namespace: auction-system }
 spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+  storageClassName: standard
 ---
-# Deployment
 apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql-auth
+kind: StatefulSet
+metadata: { name: mysql-auth, namespace: auction-system }
 spec:
-  selector:
-    matchLabels:
-      app: mysql-auth
+  serviceName: mysql-auth-svc
+  replicas: 1
+  selector: { matchLabels: { app: mysql-auth } }
   template:
-    metadata:
-      labels:
-        app: mysql-auth
+    metadata: { labels: { app: mysql-auth } }
     spec:
       containers:
-        - name: mysql
-          image: mysql:8.0
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: auth-service-secrets
-                  key: datasource-password
-            - name: MYSQL_DATABASE
-              value: auction_auth_db
-            - name: MYSQL_USER
-              value: ankur
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: auth-service-secrets
-                  key: datasource-password
-          ports:
-            - containerPort: 3306
-          volumeMounts:
-            - name: mysql-persistent-storage
-              mountPath: /var/lib/mysql
-      volumes:
-        - name: mysql-persistent-storage
-          persistentVolumeClaim:
-            claimName: mysql-auth-pvc
+      - name: mysql-auth
+        image: mysql:5.7
+        env:
+        - name: MYSQL_DATABASE
+          value: authdb
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef: { name: auth-service-secrets, key: datasource-username }
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef: { name: auth-service-secrets, key: datasource-password }
+        - name: MYSQL_ROOT_PASSWORD
+          value: rootpass
+        ports: [{ containerPort: 3306, name: mysql }]
+        volumeMounts: [{ name: mysql-data, mountPath: /var/lib/mysql }]
+  volumeClaimTemplates:
+  - metadata: { name: mysql-data }
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources: { requests: { storage: 1Gi } }
 ---
-# Service
 apiVersion: v1
 kind: Service
-metadata:
-  name: mysql-auth
+metadata: { name: mysql-auth-svc, namespace: auction-system }
 spec:
-  selector:
-    app: mysql-auth
-  ports:
-    - protocol: TCP
-      port: 3306
-      targetPort: 3306
+  selector: { app: mysql-auth }
+  ports: [{ port: 3306, targetPort: 3306, name: mysql }]

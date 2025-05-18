@@ -1,66 +1,46 @@
-# PVC
 apiVersion: v1
 kind: PersistentVolumeClaim
-metadata:
-  name: mysql-auction-pvc
+metadata: { name: auction-db-pvc, namespace: auction-system }
 spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+  storageClassName: standard
 ---
-# Deployment
 apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql-auction
+kind: StatefulSet
+metadata: { name: mysql-auction, namespace: auction-system }
 spec:
-  selector:
-    matchLabels:
-      app: mysql-auction
+  serviceName: mysql-auction-svc
+  replicas: 1
+  selector: { matchLabels: { app: mysql-auction } }
   template:
-    metadata:
-      labels:
-        app: mysql-auction
+    metadata: { labels: { app: mysql-auction } }
     spec:
       containers:
-        - name: mysql
-          image: mysql:8.0
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: auction-service-secrets
-                  key: datasource-password
-            - name: MYSQL_DATABASE
-              value: auction_db
-            - name: MYSQL_USER
-              value: ankur
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: auction-service-secrets
-                  key: datasource-password
-          ports:
-            - containerPort: 3306
-          volumeMounts:
-            - name: mysql-persistent-storage
-              mountPath: /var/lib/mysql
-      volumes:
-        - name: mysql-persistent-storage
-          persistentVolumeClaim:
-            claimName: mysql-auction-pvc
+      - name: mysql-auction
+        image: mysql:5.7
+        env:
+        - name: MYSQL_DATABASE    
+          value: auctiondb
+        - name: MYSQL_USER        
+          valueFrom:
+            secretKeyRef: { name: auction-service-secrets, key: datasource-username }
+        - name: MYSQL_PASSWORD    
+          valueFrom:
+            secretKeyRef: { name: auction-service-secrets, key: datasource-password }
+        - name: MYSQL_ROOT_PASSWORD 
+          value: rootpass
+        ports: [{ containerPort: 3306, name: mysql }]
+        volumeMounts: [{ name: mysql-data, mountPath: /var/lib/mysql }]
+  volumeClaimTemplates:
+  - metadata: { name: mysql-data }
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources: { requests: { storage: 1Gi } }
 ---
-# Service
 apiVersion: v1
 kind: Service
-metadata:
-  name: mysql-auction
+metadata: { name: mysql-auction-svc, namespace: auction-system }
 spec:
-  selector:
-    app: mysql-auction
-  ports:
-    - protocol: TCP
-      port: 3306
-      targetPort: 3306
+  selector: { app: mysql-auction }
+  ports: [{ port: 3306, targetPort: 3306, name: mysql }]

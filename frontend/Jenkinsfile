@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = 'auction-system-frontend'
         GITHUB_REPO_URL = 'https://github.com/Ankur7470/real-time-auction-system.git'
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
     }
 
     triggers {
