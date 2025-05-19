@@ -9,12 +9,11 @@
   vars_files:
     - vault/secrets.yml
   tasks:
-   
+
     - name: Create Namespace
       kubernetes.core.k8s:
         state: present
-        definition: "{{ lookup('file', '/home/ankur/SPE/real-time-auction-system/devops/k8s/backend/namespace.yml') | from_yaml }}"
-        # definition: "{{ lookup('file', '../../../k8s/backend/namespace.yml') | from_yaml }}"
+        definition: "{{ lookup('file', playbook_dir + '/../../../k8s/backend/namespace.yml') | from_yaml }}"
 
     - name: Create JWT Secret for all services
       kubernetes.core.k8s:
@@ -80,21 +79,16 @@
         state: present
         src: "{{ item }}"
       loop:
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/mysql-auth.yml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/mysql-auction.yml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/mysql-bidding.yml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/eureka-server-service/deployment.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/auth-service/deployment.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/auth-service/hpa.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/auction-service/deployment.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/auction-service/hpa.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/bidding-service/deployment.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/bidding-service/hpa.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/api-gateway-service/deployment.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/api-gateway-service/hpa.yaml
-        - /home/ankur/SPE/real-time-auction-system/devops/k8s/backend/api-gateway-service/ingress.yaml
-    
-
-  
-  
-
+        - "{{ playbook_dir }}/../../../k8s/backend/mysql-auth.yml"
+        - "{{ playbook_dir }}/../../../k8s/backend/mysql-auction.yml"
+        - "{{ playbook_dir }}/../../../k8s/backend/mysql-bidding.yml"
+        - "{{ playbook_dir }}/../../../k8s/backend/eureka-server-service/deployment.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/auth-service/deployment.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/auth-service/hpa.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/auction-service/deployment.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/auction-service/hpa.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/bidding-service/deployment.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/bidding-service/hpa.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/api-gateway-service/deployment.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/api-gateway-service/hpa.yaml"
+        - "{{ playbook_dir }}/../../../k8s/backend/api-gateway-service/ingress.yaml"
