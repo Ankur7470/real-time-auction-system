@@ -13,7 +13,7 @@
     - name: Create Namespace
       kubernetes.core.k8s:
         state: present
-        definition: "{{ lookup('file', '../k8s/backend/namespace.yml') | from_yaml }}"
+        definition: "{{ lookup('file', '../../../k8s/backend/namespace.yml') | from_yaml }}"
 
     - name: Create JWT Secret for all services
       kubernetes.core.k8s:
@@ -79,19 +79,19 @@
         state: present
         src: "{{ item }}"
       loop:
-        - ../k8s/backend/mysql-auth.yml
-        - ../k8s/backend/mysql-auction.yml
-        - ../k8s/backend/mysql-bidding.yml
-        - ../k8s/backend/eureka-server-service/deployment.yaml
-        - ../k8s/backend/auth-service/deployment.yaml
-        - ../k8s/backend/auth-service/hpa.yaml
-        - ../k8s/backend/auction-service/deployment.yaml
-        - ../k8s/backend/auction-service/hpa.yaml
-        - ../k8s/backend/bidding-service/deployment.yaml
-        - ../k8s/backend/bidding-service/hpa.yaml
-        - ../k8s/backend/api-gateway-service/deployment.yaml
-        - ../k8s/backend/api-gateway-service/hpa.yaml
-        - ../k8s/backend/api-gateway-service/ingress.yaml
+        - ../../../k8s/backend/mysql-auth.yml
+        - ../../../k8s/backend/mysql-auction.yml
+        - ../../../k8s/backend/mysql-bidding.yml
+        - ../../../k8s/backend/eureka-server-service/deployment.yaml
+        - ../../../k8s/backend/auth-service/deployment.yaml
+        - ../../../k8s/backend/auth-service/hpa.yaml
+        - ../../../k8s/backend/auction-service/deployment.yaml
+        - ../../../k8s/backend/auction-service/hpa.yaml
+        - ../../../k8s/backend/bidding-service/deployment.yaml
+        - ../../../k8s/backend/bidding-service/hpa.yaml
+        - ../../../k8s/backend/api-gateway-service/deployment.yaml
+        - ../../../k8s/backend/api-gateway-service/hpa.yaml
+        - ../../../k8s/backend/api-gateway-service/ingress.yaml
     
 
   
