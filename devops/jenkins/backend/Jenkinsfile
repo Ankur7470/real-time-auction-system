@@ -76,7 +76,7 @@ pipeline {
         stage('Deploy to K8s with Ansible') {
             steps {
                 dir('devops') {
-                    sh "ansible-playbook -i ansible/backend/inventory ansible/backend/deploy.yml --vault-password-file ansible/backend/vault_pass.yml"
+                    sh "ansible-playbook -i ansible/backend/inventory ansible/backend/deploy.yml --vault-password-file ansible/backend/vault_pass.txt"
                 }
             }
         }

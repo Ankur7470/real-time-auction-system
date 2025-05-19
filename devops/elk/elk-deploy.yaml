@@ -1,0 +1,20 @@
+- name: Deploy ELK Stack
+  hosts: localhost
+  tasks:
+    - name: Apply ELK namespace
+      command: kubectl apply -f elk-namespace.yaml
+
+    - name: Deploy Elasticsearch
+      command: kubectl apply -f elasticsearch-deployment.yaml
+
+    - name: Deploy Kibana
+      command: kubectl apply -f kibana-deployment.yaml
+
+    - name: Deploy Fluent Bit ConfigMap
+      command: kubectl apply -f fluent-bit-configmap.yaml
+
+    - name: Deploy Fluent Bit DaemonSet
+      command: kubectl apply -f fluent-bit-daemonset.yaml
+
+    - name: Deploy Fluent Bit RBAC
+      command: kubectl apply -f fluent-bit-serviceaccount.yaml

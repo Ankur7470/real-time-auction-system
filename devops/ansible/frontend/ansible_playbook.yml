@@ -22,6 +22,7 @@
     - name: Apply Kubernetes manifests
       shell: |
         cd ..
+        cd ..
         cd k8s/frontend/
         kubectl delete -f . --ignore-not-found
         kubectl apply -f .
