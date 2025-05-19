@@ -30,16 +30,30 @@ spec:
 #   type: ClusterIP
 #   selector: { app: api-gateway }
 #   ports: [{ port: 80, targetPort: 8000, name: http }]
-
 apiVersion: v1
 kind: Service
 metadata:
   name: api-gateway-svc
   namespace: auction-system
 spec:
+  type: NodePort
   selector:
     app: api-gateway
   ports:
     - name: http
       port: 80
       targetPort: 8000
+      nodePort: 31001  # You choose the nodePort
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: api-gateway-svc
+#   namespace: auction-system
+# spec:
+#   selector:
+#     app: api-gateway
+#   ports:
+#     - name: http
+#       port: 80
+#       targetPort: 8000

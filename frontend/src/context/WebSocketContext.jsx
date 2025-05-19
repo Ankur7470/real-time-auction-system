@@ -2,7 +2,7 @@ import React, { createContext, useContext, useRef, useEffect } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useAuth } from './AuthContext';
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = "http://192.168.49.2:31001"
 
 const WebSocketContext = createContext(null);
 
