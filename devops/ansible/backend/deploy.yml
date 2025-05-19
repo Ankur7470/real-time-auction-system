@@ -13,7 +13,7 @@
     - name: Create Namespace
       kubernetes.core.k8s:
         state: present
-        definition: "{{ lookup('file', '.../k8s/namespace.yml') | from_yaml }}"
+        definition: "{{ lookup('file', '.../k8s/backend/namespace.yml') | from_yaml }}"
 
     - name: Create JWT Secret for all services
       kubernetes.core.k8s:
