@@ -17,7 +17,7 @@ spec:
         - name: logstash
           image: docker.elastic.co/logstash/logstash:7.17.0
           ports:
-            - containerPort: 5044
+            - containerPort: 5000
           volumeMounts:
             - name: config-volume
               mountPath: /usr/share/logstash/pipeline
@@ -42,5 +42,5 @@ spec:
     app: logstash
   ports:
     - protocol: TCP
-      port: 5044
-      targetPort: 5044
+      port: 5000
+      targetPort: 5000

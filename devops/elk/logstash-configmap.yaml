@@ -6,10 +6,9 @@ metadata:
 data:
   logstash.conf: |
     input {
-      file {
-        path => "/logs/*.log"
-        start_position => "beginning"
-        sincedb_path => "/dev/null"
+      tcp {
+        port => 5000
+        codec => json
       }
     }
 
@@ -18,6 +17,12 @@ data:
         source => "message"
         skip_on_invalid_json => true
       }
+
+      mutate {
+        add_field => {
+          "service" => "%{[application]}"
+        }
+      }
     }
 
     output {
@@ -25,5 +30,8 @@ data:
         hosts => ["http://elasticsearch:9200"]
         index => "springboot-logs-%{+YYYY.MM.dd}"
       }
-      stdout { codec => rubydebug }
+
+      stdout {
+        codec => rubydebug
+      }
     }
