@@ -9,20 +9,7 @@
   vars_files:
     - vault/secrets.yml
   tasks:
-    # - name: Create MySQL Root Secret
-    #   kubernetes.core.k8s:
-    #     state: present
-    #     definition:
-    #       apiVersion: v1
-    #       kind: Secret
-    #       metadata:
-    #         name: mysql-root-secrets
-    #         namespace: "{{ namespace }}"
-    #       type: Opaque
-    #       stringData:
-    #         root-password: "{{ vault_mysql_root_password }}"
-
-
+   
     - name: Create Namespace
       kubernetes.core.k8s:
         state: present
@@ -52,7 +39,7 @@
             namespace: "{{ namespace }}"
           type: Opaque
           stringData:
-            datasource-url: "jdbc:mysql://mysql-auth-svc:3306/authdb"
+            datasource-url: "jdbc:mysql://mysql-auth-svc:3306/auction_auth_db"
             datasource-username: "{{ vault_auth_db_user }}"
             datasource-password: "{{ vault_auth_db_pass }}"
             jwt-secret: "{{ vault_jwt_secret }}"
@@ -68,7 +55,7 @@
             namespace: "{{ namespace }}"
           type: Opaque
           stringData:
-            datasource-url: "jdbc:mysql://mysql-auction-svc:3306/auctiondb"
+            datasource-url: "jdbc:mysql://mysql-auction-svc:3306/auction_db"
             datasource-username: "{{ vault_auction_db_user }}"
             datasource-password: "{{ vault_auction_db_pass }}"
 
@@ -83,7 +70,7 @@
             namespace: "{{ namespace }}"
           type: Opaque
           stringData:
-            datasource-url: "jdbc:mysql://mysql-bidding-svc:3306/biddingdb"
+            datasource-url: "jdbc:mysql://mysql-bidding-svc:3306/auction_bidding_db"
             datasource-username: "{{ vault_bidding_db_user }}"
             datasource-password: "{{ vault_bidding_db_pass }}"
 
