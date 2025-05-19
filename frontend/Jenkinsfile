@@ -51,7 +51,8 @@ pipeline {
             steps {
                 dir('frontend') {
                     script {
-                        docker.build("${DOCKER_IMAGE_NAME}", '.')
+                        docker.build("ankur2k19/${DOCKER_IMAGE_NAME}")
+                        // docker.build("${DOCKER_IMAGE_NAME}", '.')
                     }
                 }
             }

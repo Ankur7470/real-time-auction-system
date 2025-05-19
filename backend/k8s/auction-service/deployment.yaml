@@ -1,38 +1,49 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: { name: auction-service, namespace: auction-system }
+metadata:
+  name: auction-service
+  namespace: auction-system
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auction-service       # ← required
   template:
-    metadata: { labels: { app: auction-service } }
+    metadata:
+      labels:
+        app: auction-service     # ← must match selector
     spec:
       initContainers:
       - name: wait-for-db
         image: busybox
-        command: ['sh', '-c', 'until nc -z mysql-auction-svc 3306; do echo "Waiting for DB"; sleep 2; done']
+        command:
+          - sh
+          - -c
+          - until nc -z mysql-auction-svc 3306; do echo "Waiting for DB"; sleep 2; done
       containers:
       - name: auction-service
         image: ankur2k19/auction-service:latest
-        ports: [{ containerPort: 8083 }]
+        ports:
+          - containerPort: 8083
+            name: http
         env:
-        - name: SPRING_DATASOURCE_URL
-          valueFrom:
-            secretKeyRef: { name: auction-service-secrets, key: datasource-url }
-        - name: SPRING_DATASOURCE_USERNAME
-          valueFrom:
-            secretKeyRef: { name: auction-service-secrets, key: datasource-username }
-        - name: SPRING_DATASOURCE_PASSWORD
-          valueFrom:
-            secretKeyRef: { name: auction-service-secrets, key: datasource-password }
+          - name: SPRING_DATASOURCE_URL
+            valueFrom:
+              secretKeyRef:
+                name: auction-service-secrets
+                key: datasource-url
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: auction-service-secrets
+                key: datasource-username
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: auction-service-secrets
+                key: datasource-password
 
 ---
-# apiVersion: v1
-# kind: Service
-# metadata: { name: auction-service, namespace: auction-system }
-# spec:
-#   selector: { app: auction-service }
-#   ports: [{ port: 8083, targetPort: 8083 }]
-#   type: ClusterIP
-
 apiVersion: v1
 kind: Service
 metadata:
