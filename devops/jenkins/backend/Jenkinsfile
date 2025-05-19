@@ -1,0 +1,102 @@
+pipeline {
+    agent any
+
+    environment {
+        GITHUB_REPO_URL = 'https://github.com/Ankur7470/real-time-auction-system.git'
+        DOCKER_IMAGE_NAMESPACE = 'ankur2k19'
+        DOCKER_IMAGE_TAG = 'latest'
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+    }
+
+    triggers {
+        githubPush()
+    }
+
+    tools {
+        maven 'Maven 3.9.9'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: "${GITHUB_REPO_URL}"
+            }
+        }
+
+        stage('Detect Backend Changes') {
+            steps {
+                script {
+                    def previousCommit = sh(script: "git rev-parse HEAD~1", returnStdout: true).trim()
+                    def changes = sh(
+                        script: "git diff --name-only ${previousCommit} HEAD | grep '^backend/' || true",
+                        returnStdout: true
+                    ).trim()
+
+                    if (changes == "") {
+                        echo "No changes in backend folder. Skipping the pipeline."
+                        currentBuild.description = "No backend changes"
+                        currentBuild.result = 'NOT_BUILT'
+                        error("No backend changes")
+                    } else {
+                        echo "Changes detected in backend folder. Proceeding with build."
+                    }
+                }
+            }
+        }
+
+        stage('Build Java Microservices') {
+            steps {
+                script {
+                    def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+                    for (service in services) {
+                        dir("backend/${service}") {
+                            sh 'mvn clean package -DskipTests'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build and Push Docker Images') {
+            steps {
+                script {
+                    def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
+                    docker.withRegistry('', 'DockerHubCred') {
+                        for (service in services) {
+                            dir("backend/${service}") {
+                                def image = docker.build("${DOCKER_IMAGE_NAMESPACE}/${service}:${DOCKER_IMAGE_TAG}", '.')
+                                image.push()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to K8s with Ansible') {
+            steps {
+                dir('devops') {
+                    sh "ansible-playbook -i ansible/backend/inventory ansible/backend/deploy.yml --vault-password-file ansible/backend/vault_pass.yml"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Backend pipeline completed successfully.'
+        }
+        failure {
+            echo 'Backend pipeline failed.'
+        }
+        aborted {
+            echo 'Backend pipeline was aborted.'
+        }
+        notBuilt {
+            echo 'Backend pipeline skipped as there were no changes.'
+        }
+        always {
+            echo 'Backend pipeline finished execution.'
+        }
+    }
+}

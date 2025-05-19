@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: { name: mysql-auction, namespace: auction-system }
+spec:
+  serviceName: mysql-auction-svc
+  replicas: 1
+  selector: { matchLabels: { app: mysql-auction } }
+  template:
+    metadata: { labels: { app: mysql-auction } }
+    spec:
+      containers:
+      - name: mysql-auction
+        image: mysql:5.7
+        env:
+        - name: MYSQL_DATABASE    
+          value: auction_db
+        - name: MYSQL_USER        
+          valueFrom:
+            secretKeyRef: { name: auction-service-secrets, key: datasource-username }
+        - name: MYSQL_PASSWORD    
+          valueFrom:
+            secretKeyRef: { name: auction-service-secrets, key: datasource-password }
+        - name: MYSQL_ROOT_PASSWORD 
+          value: rootpass
+        ports: [{ containerPort: 3306, name: mysql }]
+        volumeMounts: [{ name: mysql-data, mountPath: /var/lib/mysql }]
+          
+  volumeClaimTemplates:
+  - metadata: { name: mysql-data }
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: mysql-auction-svc, namespace: auction-system }
+spec:
+  selector: { app: mysql-auction }
+  ports: [{ port: 3306, targetPort: 3306, name: mysql }]
