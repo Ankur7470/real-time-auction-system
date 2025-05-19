@@ -1,5 +1,7 @@
 import axios from 'axios';
-const API_URL = import.meta.env.VITE_API_URL
+// const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL || "http://api-gateway-svc.auction-system.svc.cluster.local";
+
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
