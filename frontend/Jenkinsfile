@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = 'auction-system-frontend'
         DOCKER_IMAGE_NAMESPACE = 'ankur2k19'
+        DOCKER_IMAGE_TAG = 'latest'
         GITHUB_REPO_URL = 'https://github.com/Ankur7470/real-time-auction-system.git'
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
     }
@@ -13,7 +14,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: 'main', url: "${GITHUB_REPO_URL}"
@@ -23,8 +23,9 @@ pipeline {
         stage('Detect Frontend Changes') {
             steps {
                 script {
+                    def previousCommit = sh(script: "git rev-parse HEAD~1", returnStdout: true).trim()
                     def changes = sh(
-                        script: "git diff --name-only HEAD~1 HEAD | grep '^frontend/' || true",
+                        script: "git diff --name-only ${previousCommit} HEAD | grep '^frontend/' || true",
                         returnStdout: true
                     ).trim()
 
@@ -32,7 +33,7 @@ pipeline {
                         echo "No changes in frontend folder. Skipping the pipeline."
                         currentBuild.description = "No frontend changes"
                         currentBuild.result = 'NOT_BUILT'
-                        return
+                        error("No frontend changes")
                     } else {
                         echo "Changes detected in frontend folder. Proceeding with build."
                     }
@@ -43,31 +44,25 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
+                    sh 'npm install'
                     sh 'npm run build'
                 }
             }
         }
 
-        stage('Build Frontend Docker Image') {
+        stage('Build and Push Docker Image') {
             steps {
                 dir('frontend') {
                     script {
-                        docker.build("${DOCKER_IMAGE_NAMESPACE}/${DOCKER_IMAGE_NAME}, '.")
+                        docker.withRegistry('', 'DockerHubCred') {
+                            def image = docker.build("${DOCKER_IMAGE_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}", '.')
+                            image.push()
+                        }
                     }
                 }
             }
         }
 
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('', 'DockerHubCred') {
-                        sh "docker push ankur2k19/${DOCKER_IMAGE_NAME}:latest"
-                    }
-                }
-            }
-        }
-        
         stage('Deploy to K8s with Ansible Playbook') {
             steps {
                 dir('frontend') {
@@ -82,19 +77,19 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully.'
+            echo 'Frontend pipeline completed successfully.'
         }
         failure {
-            echo 'Pipeline failed.'
+            echo 'Frontend pipeline failed.'
         }
         aborted {
-            echo 'Pipeline was aborted.'
+            echo 'Frontend pipeline was aborted.'
         }
         notBuilt {
-            echo 'Pipeline skipped as there were no changes in the frontend.'
+            echo 'Frontend pipeline skipped as there were no changes in the frontend.'
         }
         always {
-            echo 'Pipeline finished execution.'
+            echo 'Frontend pipeline finished execution.'
         }
     }
 }
