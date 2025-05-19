@@ -2,6 +2,7 @@ pipeline {
     agent any
 
      environment {
+        GITHUB_REPO_URL = 'https://github.com/Ankur7470/real-time-auction-system.git'
         DOCKER_IMAGE_NAMESPACE = 'ankur2k19'
         VAULT_PASSWORD_FILE = 'ansible/vault_pass.txt'
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
@@ -18,7 +19,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Ankur7470/real-time-auction-system.git'
+                git branch: 'main', url: "${GITHUB_REPO_URL}"
             }
         }
 
@@ -29,13 +30,10 @@ pipeline {
                         script: "git diff --name-only HEAD~1 HEAD | grep '^backend/' || true",
                         returnStdout: true
                     ).trim()
-                    // def changes = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^backend/' || true", returnStdout: true).trim()
                      if (changes == "") {
                         echo "No changes in frontend folder. Skipping the pipeline."
                         currentBuild.description = "No backendend changes"
-                        // Set build result to NOT_BUILT and exit without error
                         currentBuild.result = 'NOT_BUILT'
-                        // Use `return` to exit cleanly instead of throwing an error
                         return
                     } else {
                         echo "Changes detected in backend folder. Proceeding with build."
@@ -44,7 +42,7 @@ pipeline {
             }
         }
 
-stage('Build Backend Projects') {
+        stage('Building Java Microservices') {
             steps {
                 script {
                     def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
@@ -69,7 +67,7 @@ stage('Build Backend Projects') {
                 }
             }
         }
-//
+
         stage('Push Docker Images') {
             steps {
                 script {
