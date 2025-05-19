@@ -84,9 +84,13 @@
         - ../k8s/mysql-bidding.yml
         - ../k8s/eureka-server-service/deployment.yaml
         - ../k8s/auth-service/deployment.yaml
+        - ../k8s/auth-service/hpa.yaml
         - ../k8s/auction-service/deployment.yaml
+        - ../k8s/auction-service/hpa.yaml
         - ../k8s/bidding-service/deployment.yaml
+        - ../k8s/bidding-service/hpa.yaml
         - ../k8s/api-gateway-service/deployment.yaml
+        - ../k8s/api-gateway-service/hpa.yaml
         - ../k8s/api-gateway-service/ingress.yaml
       # loop:
       #   - ../k8s/api-gateway-service/deployment.yaml
