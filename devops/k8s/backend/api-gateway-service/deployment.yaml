@@ -13,6 +13,13 @@ spec:
       labels: 
         app: api-gateway 
     spec:
+      initContainers:
+      - name: wait-for-eureka
+        image: busybox
+        command:
+          - sh
+          - -c
+          - until nc -z eureka-server 8761; do echo "Waiting for Eureka server"; sleep 5; done
       containers:
       - name: api-gateway
         image: ankur2k19/api-gateway:latest
@@ -26,6 +33,18 @@ spec:
             secretKeyRef: 
               name: jwt-secret
               key: jwt-secret 
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        # livenessProbe:
+        #   httpGet:
+        #     path: /actuator/health
+        #     port: 8761
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 30
       
 ---
 apiVersion: v1

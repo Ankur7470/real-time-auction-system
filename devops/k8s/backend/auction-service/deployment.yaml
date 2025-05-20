@@ -14,6 +14,12 @@ spec:
         app: auction-service     
     spec:
       initContainers:
+      - name: wait-for-eureka
+        image: busybox
+        command:
+          - sh
+          - -c
+          - until nc -z eureka-server 8761; do echo "Waiting for Eureka server"; sleep 5; done
       - name: wait-for-db
         image: busybox
         command:
@@ -42,13 +48,25 @@ spec:
               secretKeyRef:
                 name: auction-service-secrets
                 key: datasource-password
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        # livenessProbe:
+        #   httpGet:
+        #     path: /actuator/health
+        #     port: 8761
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 30
+        # resources:
+        #   requests:
+        #     memory: "256Mi"
+        #     cpu: "250m"
+        #   limits:
+        #     memory: "512Mi"
+        #     cpu: "500m"
 ---
 apiVersion: v1
 kind: Service

@@ -14,9 +14,18 @@ spec:
         app: auth-service
     spec:
       initContainers:
+      - name: wait-for-eureka
+        image: busybox
+        command:
+          - sh
+          - -c
+          - until nc -z eureka-server 8761; do echo "Waiting for Eureka server"; sleep 5; done
       - name: wait-for-db
         image: busybox
-        command: ['sh', '-c', 'until nc -z mysql-auth-svc 3306; do echo "Waiting for DB"; sleep 2; done']
+        command:
+          - sh
+          - -c
+          - until nc -z mysql-auth-svc 3306; do echo "Waiting for DB"; sleep 2; done
       containers:
       - name: auth-service
         image: ankur2k19/auth-service:latest
@@ -43,6 +52,18 @@ spec:
             secretKeyRef:
               name: auth-service-secrets
               key: jwt-secret
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        # livenessProbe:
+        #   httpGet:
+        #     path: /actuator/health
+        #     port: 8761
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 30
 
 ---
 apiVersion: v1
