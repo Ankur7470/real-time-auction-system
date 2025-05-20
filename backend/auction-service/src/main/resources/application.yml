@@ -1,3 +1,19 @@
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    # org.springframework.security: DEBUG
+    com.auction_system: DEBUG
+    org.springframework.boot.actuate: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
 server:
   port: 8083
 
@@ -6,8 +22,11 @@ spring:
     name: auction-service
   datasource:
     url: jdbc:mysql://mysql-auction-svc:3306/auction_db?createDatabaseIfNotExist=true
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    # url: jdbc:mysql://localhost:3306/auction_service_db?createDatabaseIfNotExist=true
+#    username: ${SPRING_DATASOURCE_USERNAME}
+    username: ankur
+#    password: ${SPRING_DATASOURCE_PASSWORD}
+    password: Ankur@2k24
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -22,6 +41,8 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://eureka-server:8761/eureka/
+#      defaultZone: http://eureka-server.auction-system.svc.cluster.local:8761/eureka/
+      # defaultZOne: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
   instance:
@@ -36,7 +57,3 @@ feign:
         loggerLevel: full
   circuitbreaker:
     enabled: true
-
-logging:
-  level:
-    com.auction_system: DEBUG

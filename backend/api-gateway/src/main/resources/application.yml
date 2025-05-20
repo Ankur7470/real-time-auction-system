@@ -1,0 +1,68 @@
+server:
+  port: 8000
+
+jwt:
+#  secret: ${JWT_SECRET}
+  secret: auctionSecretKey123456789012345678901234567890
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka/
+    #  defaultZone: http://eureka-server.auction-system.svc.cluster.local:8761/eureka/
+      # defaultZone: http://localhost:8761/eureka/
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+        - id: auction-service
+          uri: lb://auction-service
+          predicates:
+            - Path=/api/auctions/**
+        - id: bidding-service
+          uri: lb://bidding-service
+          predicates:
+            - Path=/api/bids/**
+        - id: bidding-service-ws
+          uri: lb://bidding-service
+          predicates:
+            - Path=/ws-auction/**
+          metadata:
+            protocol: ws
+      httpclient:
+        websocket:
+          max-frame-payload-length: 65536
+
+
+
+# management:
+#   endpoints:
+#     web:
+#       exposure:
+#         include: health
+#       base-path: /actuator
+#   endpoint:
+#     health:
+#       probes:
+#         enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    com.auction_system: DEBUG
+    org.springframework.boot.actuate: INFO

@@ -11,13 +11,13 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOriginPattern("http://192.168.49.2:31000");
-        // corsConfig.addAllowedOriginPattern("http://localhost:5173");
+         corsConfig.addAllowedOriginPattern("http://localhost:5173");
+         corsConfig.addAllowedOriginPattern("http://frontend-service.auction-system.svc.cluster.local");
         corsConfig.addAllowedMethod("*");
         corsConfig.addAllowedHeader("*");
-        corsConfig.addExposedHeader("Authorization"); // Important for WebSocket auth
+        corsConfig.addExposedHeader("Authorization");
         corsConfig.setAllowCredentials(true);
-        corsConfig.setMaxAge(3600L); // Cache OPTIONS preflight for 1 hour
+        corsConfig.setMaxAge(3600L); 
 
         // Special WebSocket headers
         corsConfig.addAllowedHeader("Upgrade");

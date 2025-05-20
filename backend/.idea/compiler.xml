@@ -8,17 +8,17 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="auth-service" />
-        <module name="common" />
         <module name="bidding-service" />
         <module name="api-gateway" />
         <module name="auction-service" />
         <module name="eureka-server" />
-        <module name="notification-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="api-gateway-service" target="17" />
+      <module name="common" target="17" />
       <module name="eureka-registry-service" target="17" />
+      <module name="notification-service" target="17" />
       <module name="user-service" target="17" />
     </bytecodeTargetLevel>
   </component>

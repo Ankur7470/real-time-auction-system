@@ -1,3 +1,19 @@
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    # org.springframework.security: DEBUG
+    com.auction_system: DEBUG
+    org.springframework.boot.actuate: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
 server:
   port: 8082
 
@@ -6,8 +22,11 @@ spring:
     name: auth-service
   datasource:
     url: jdbc:mysql://mysql-auth-svc:3306/auction_auth_db?createDatabaseIfNotExist=true
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    # url: jdbc:mysql://localhost:3306/auction_auth_db?createDatabaseIfNotExist=true
+#    username: ${SPRING_DATASOURCE_USERNAME}
+    username: ankur
+#    password: ${SPRING_DATASOURCE_PASSWORD}
+    password: Ankur@2k24
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -22,19 +41,14 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://eureka-server:8761/eureka/
+#      defaultZone: http://eureka-server.auction-system.svc.cluster.local:8761/eureka/
+      # defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
   instance:
     preferIpAddress: true
 
 jwt:
-  secret: ${JWT_SECRET}
-  # secret: auctionSecretKey123456789012345678901234567890
+#  secret: ${JWT_SECRET}
+  secret: auctionSecretKey123456789012345678901234567890
   expirationMs: 86400000
-
-logging:
-  level:
-    org.springframework.security: DEBUG
-    com.auction_system: DEBUG
-
-
