@@ -25,11 +25,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-auction")
                 .setAllowedOriginPatterns("http://localhost:5173", "http://192.168.49.2:31000", "http://frontend-service.auction-system.svc.cluster.local")
-                // .setAllowedOrigins(Arrays.asList(
-                //     "http://localhost:5173",
-                //     "http://192.168.49.2:31000", 
-                //     "http://frontend-service.auction-system.svc.cluster.local"
-                // ))
                 .addInterceptors(authShakeInterceptor())
                 .setHandshakeHandler(new DefaultHandshakeHandler())
                 .withSockJS()
