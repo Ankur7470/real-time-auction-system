@@ -28,7 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     "http://localhost:5173",
                     "http://192.168.49.2:31000", 
                     "http://frontend-service.auction-system.svc.cluster.local"
-                ));
+                ))
                 .addInterceptors(authShakeInterceptor())
                 .setHandshakeHandler(new DefaultHandshakeHandler())
                 .withSockJS()
