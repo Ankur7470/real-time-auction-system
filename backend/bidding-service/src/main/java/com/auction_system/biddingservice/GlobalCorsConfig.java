@@ -13,6 +13,7 @@ public class GlobalCorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                             "http://localhost:5173",
+                            "http://192.168.49.2:31000", 
                             "http://frontend-service.auction-system.svc.cluster.local"
                         )
                         .allowedMethods("*")
@@ -23,3 +24,4 @@ public class GlobalCorsConfig {
         };
     }
 }
+
