@@ -14,34 +14,73 @@ import java.util.Map;
 public class AuthShakeInterceptor implements HandshakeInterceptor {
 
 
+    // @Override
+    // public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
+    //                                WebSocketHandler wsHandler, Map<String, Object> attributes) {
+
+    //     // Allow SockJS transport requests to pass through
+    //     String path = request.getURI().getPath();
+    //     if (path.contains("/info") || path.contains("/iframe") || path.contains("websocket")) {
+    //         return true;
+    //     }
+
+    //     // Check auth for actual STOMP connection
+    //     List<String> authHeaders = request.getHeaders().get("Authorization");
+    //     if (authHeaders == null || authHeaders.isEmpty()) {
+    //         response.setStatusCode(HttpStatus.UNAUTHORIZED);
+    //         return false;
+    //     }
+
+    //     String token = authHeaders.get(0).replace("Bearer ", "");
+    //     try {
+    //         String username = extractUsernameFromToken(token);
+    //         if (username == null) throw new Exception("Invalid token");
+    //         attributes.put("username", username);
+    //         return true;
+    //     } catch (Exception e) {
+    //         response.setStatusCode(HttpStatus.UNAUTHORIZED);
+    //         return false;
+    //     }
+    // }
+
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
-                                   WebSocketHandler wsHandler, Map<String, Object> attributes) {
+public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                               WebSocketHandler wsHandler, Map<String, Object> attributes) {
+    // Skip checks for SockJS initial info/websocket
+    String path = request.getURI().getPath();
+    if (path.contains("/info") || path.contains("/iframe") || path.contains("websocket")) {
+        return true;
+    }
 
-        // Allow SockJS transport requests to pass through
-        String path = request.getURI().getPath();
-        if (path.contains("/info") || path.contains("/iframe") || path.contains("websocket")) {
-            return true;
-        }
+    // Extract token from query param if header is missing (SockJS case)
+    List<String> authHeaders = request.getHeaders().get("Authorization");
+    String token = null;
 
-        // Check auth for actual STOMP connection
-        List<String> authHeaders = request.getHeaders().get("Authorization");
-        if (authHeaders == null || authHeaders.isEmpty()) {
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return false;
-        }
-
-        String token = authHeaders.get(0).replace("Bearer ", "");
-        try {
-            String username = extractUsernameFromToken(token);
-            if (username == null) throw new Exception("Invalid token");
-            attributes.put("username", username);
-            return true;
-        } catch (Exception e) {
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return false;
+    if (authHeaders != null && !authHeaders.isEmpty()) {
+        token = authHeaders.get(0).replace("Bearer ", "");
+    } else {
+        var queryParams = request.getURI().getQuery();
+        if (queryParams != null && queryParams.contains("token=")) {
+            token = queryParams.split("token=")[1].split("&")[0];
         }
     }
+
+    if (token == null) {
+        response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        return false;
+    }
+
+    try {
+        String username = extractUsernameFromToken(token);
+        if (username == null) throw new Exception("Invalid token");
+        attributes.put("username", username);
+        return true;
+    } catch (Exception e) {
+        response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        return false;
+    }
+}
+
 
     private String extractUsernameFromToken(String token) {
         // Simple JWT parsing without validation
