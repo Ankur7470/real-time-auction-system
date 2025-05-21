@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/auctions",
             "/api/bids/auction/**",
             "/api/auth/verify",
-           "/ws-auction",
+           "/ws-auction/**",
            "/actuator/**"
     );
 
