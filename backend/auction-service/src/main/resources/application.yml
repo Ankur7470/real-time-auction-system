@@ -5,24 +5,15 @@ logging:
     com.auction_system: DEBUG
     org.springframework.boot.actuate: INFO
 
-# management:
-#   endpoints:
-#     web:
-#       exposure:
-#         include: "*"
-#   endpoint:
-#     health:
-#       show-details: always
-
 management:
   endpoints:
     web:
       base-path: /actuator
       exposure:
-        include: "*"          # Exposes all actuator endpoints including health
+        include: "*"          
   endpoint:
     health:
-      show-details: always    # Optional: shows full health info
+      show-details: always   
       probes:
         enabled: true
 
@@ -33,12 +24,13 @@ spring:
   application:
     name: auction-service
   datasource:
-    url: jdbc:mysql://mysql-auction-svc:3306/auction_db?createDatabaseIfNotExist=true
+    url: ${SPRING_DATASOURCE_URL}
+    # url: jdbc:mysql://mysql-auction-svc:3306/auction_db?createDatabaseIfNotExist=true
     # url: jdbc:mysql://localhost:3306/auction_service_db?createDatabaseIfNotExist=true
-#    username: ${SPRING_DATASOURCE_USERNAME}
-    username: ankur
-#    password: ${SPRING_DATASOURCE_PASSWORD}
-    password: Ankur@2k24
+    username: ${SPRING_DATASOURCE_USERNAME}
+    # username: ankur
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    # password: Ankur@2k24
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -52,7 +44,8 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: ${EUREKA_SERVER_URI}
+      # defaultZone: http://eureka-server:8761/eureka/
 #      defaultZone: http://eureka-server.auction-system.svc.cluster.local:8761/eureka/
       # defaultZOne: http://localhost:8761/eureka/
     register-with-eureka: true
