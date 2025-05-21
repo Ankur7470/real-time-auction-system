@@ -117,7 +117,6 @@ const Dashboard = () => {
       ) : (
         <div className={currentTab.type === 'bid' ? 'space-y-4' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'}>
           {currentTab.data.map((item) => {
-            //console.log('Rendering item:', item);
             return (
               <div key={item.id || item.auction?.id || Math.random()}>
                 {currentTab.type === 'bid' ? (

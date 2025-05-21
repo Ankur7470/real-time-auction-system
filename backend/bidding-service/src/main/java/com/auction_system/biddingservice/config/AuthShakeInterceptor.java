@@ -44,42 +44,41 @@ public class AuthShakeInterceptor implements HandshakeInterceptor {
     // }
 
     @Override
-public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
+    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                WebSocketHandler wsHandler, Map<String, Object> attributes) {
-    // Skip checks for SockJS initial info/websocket
-    String path = request.getURI().getPath();
-    if (path.contains("/info") || path.contains("/iframe") || path.contains("websocket")) {
-        return true;
-    }
+        // Skip checks for SockJS initial info/websocket
+        String path = request.getURI().getPath();
+        if (path.contains("/info") || path.contains("/iframe") || path.contains("websocket")) {
+            return true;
+        }
 
-    // Extract token from query param if header is missing (SockJS case)
-    List<String> authHeaders = request.getHeaders().get("Authorization");
-    String token = null;
+        List<String> authHeaders = request.getHeaders().get("Authorization");
+        String token = null;
 
-    if (authHeaders != null && !authHeaders.isEmpty()) {
-        token = authHeaders.get(0).replace("Bearer ", "");
-    } else {
-        var queryParams = request.getURI().getQuery();
-        if (queryParams != null && queryParams.contains("token=")) {
-            token = queryParams.split("token=")[1].split("&")[0];
+        if (authHeaders != null && !authHeaders.isEmpty()) {
+            token = authHeaders.get(0).replace("Bearer ", "");
+        } else {
+            var queryParams = request.getURI().getQuery();
+            if (queryParams != null && queryParams.contains("token=")) {
+                token = queryParams.split("token=")[1].split("&")[0];
+            }
+        }
+
+        if (token == null) {
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            return false;
+        }
+
+        try {
+            String username = extractUsernameFromToken(token);
+            if (username == null) throw new Exception("Invalid token");
+            attributes.put("username", username);
+            return true;
+        } catch (Exception e) {
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            return false;
         }
     }
-
-    if (token == null) {
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        return false;
-    }
-
-    try {
-        String username = extractUsernameFromToken(token);
-        if (username == null) throw new Exception("Invalid token");
-        attributes.put("username", username);
-        return true;
-    } catch (Exception e) {
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        return false;
-    }
-}
 
 
     private String extractUsernameFromToken(String token) {
