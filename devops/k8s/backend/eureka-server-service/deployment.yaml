@@ -16,22 +16,25 @@ spec:
       containers:
       - name: eureka-server
         image: ankur2k19/eureka-server:latest
-        ports: [{ containerPort: 8761, name: eureka }]
-      env:
-      - name: JAVA_OPTS
-        value: "-Xms512m -Xmx1024m"
-      readinessProbe:
-        httpGet:
-          path: /actuator/health
-          port: 8761
-        initialDelaySeconds: 10
-        periodSeconds: 10
-      livenessProbe:
-        httpGet:
-          path: /actuator/health
-          port: 8761
-        initialDelaySeconds: 30
-        periodSeconds: 30
+        ports:
+          - containerPort: 8761
+            name: eureka
+        env:
+          - name: JAVA_OPTS
+            value: "-Xms512m -Xmx1024m"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8761
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8761
+          initialDelaySeconds: 30
+          periodSeconds: 30
+
       
 ---
 apiVersion: v1
