@@ -11,13 +11,13 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && !stompClient.current) {
-      // const socket = new SockJS('/ws-auction');
-      const socket = new SockJS(`/ws-auction?token=${localStorage.getItem("token")}`);
+      const socket = new SockJS('/ws-auction');
+     
       stompClient.current = new Client({
         webSocketFactory: () => socket,
-        // connectHeaders: {
-        //   Authorization: `Bearer ${localStorage.getItem('token')}`
-        // },
+        connectHeaders: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
         onConnect: () => {
           console.log('WebSocket connected');
         },
