@@ -11,8 +11,9 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-         corsConfig.addAllowedOriginPattern("http://localhost:5173");
-         corsConfig.addAllowedOriginPattern("http://frontend-service.auction-system.svc.cluster.local");
+        corsConfig.addAllowedOriginPattern("*"); // Temporarily allow all for testing
+        //  corsConfig.addAllowedOriginPattern("http://localhost:5173");
+        //  corsConfig.addAllowedOriginPattern("http://frontend-service.auction-system.svc.cluster.local");
         corsConfig.addAllowedMethod("*");
         corsConfig.addAllowedHeader("*");
         corsConfig.addExposedHeader("Authorization");

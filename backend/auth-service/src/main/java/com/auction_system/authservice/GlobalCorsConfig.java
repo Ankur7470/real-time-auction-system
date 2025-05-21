@@ -11,11 +11,12 @@ public class GlobalCorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
-                            "http://localhost:5173",
-                            "http://192.168.49.2:31000",
-                            "http://frontend-service.auction-system.svc.cluster.local"
-                        )
+                        .allowedOrigins("*") // Temporarily allow all
+                        // .allowedOrigins(
+                        //     "http://localhost:5173",
+                        //     "http://192.168.49.2:31000",
+                        //     "http://frontend-service.auction-system.svc.cluster.local"
+                        // )
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .exposedHeaders("Authorization")
