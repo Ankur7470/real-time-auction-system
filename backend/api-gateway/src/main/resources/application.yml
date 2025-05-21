@@ -1,18 +1,6 @@
 server:
   port: 8000
 
-jwt:
-  secret: ${JWT_SECRET}
-  # secret: auctionSecretKey123456789012345678901234567890
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: ${EUREKA_SERVER_URI}
-      # defaultZone: http://eureka-server:8761/eureka/
-    #  defaultZone: http://eureka-server.auction-system.svc.cluster.local:8761/eureka/
-      # defaultZone: http://localhost:8761/eureka/
-
 spring:
   application:
     name: api-gateway
@@ -40,6 +28,14 @@ spring:
       httpclient:
         websocket:
           max-frame-payload-length: 65536
+
+jwt:
+  secret: ${JWT_SECRET}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER_URI}
 
 management:
   endpoints:

@@ -37,7 +37,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <-- Add this
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                .authorizeHttpRequests(auth ->
@@ -46,7 +46,6 @@ public class WebSecurityConfig {
                                .requestMatchers("/actuator/**").permitAll()
                                .anyRequest().authenticated()
                );
-                // .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
     }
 
