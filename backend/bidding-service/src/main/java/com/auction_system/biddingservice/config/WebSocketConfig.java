@@ -8,6 +8,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -23,8 +24,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-auction")
-                 .setAllowedOriginPatterns("http://localhost:5173")
-//                .setAllowedOriginPatterns("http://192.168.49.2:31000")
+                .setAllowedOrigins(Arrays.asList(
+                    "http://localhost:5173",
+                    "http://192.168.49.2:31000", 
+                    "http://frontend-service.auction-system.svc.cluster.local"
+                ));
                 .addInterceptors(authShakeInterceptor())
                 .setHandshakeHandler(new DefaultHandshakeHandler())
                 .withSockJS()
