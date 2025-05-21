@@ -2,8 +2,6 @@ import React, { createContext, useContext, useRef, useEffect } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useAuth } from './AuthContext';
-//const API_URL = "http://192.168.49.2:31001"
-//const API_URL = "http://localhost:8000"
 
 const WebSocketContext = createContext(null);
 
@@ -13,12 +11,14 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && !stompClient.current) {
-      const socket = new SockJS('/ws-auction');
+      const token = localStorage.getItem('token');
+      const socket = new SockJS(`/ws-auction?token=${token}`); 
+      // const socket = new SockJS('/ws-auction');
       stompClient.current = new Client({
         webSocketFactory: () => socket,
-        connectHeaders: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
+        // connectHeaders: {
+        //   Authorization: `Bearer ${localStorage.getItem('token')}`
+        // },
         onConnect: () => {
           console.log('WebSocket connected');
         },
