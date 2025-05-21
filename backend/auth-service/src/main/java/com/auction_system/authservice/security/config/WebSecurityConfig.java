@@ -34,32 +34,19 @@ public class WebSecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    //     http.cors();
-    //     http.csrf(csrf -> csrf.disable())
-    //             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    //             .authorizeHttpRequests(auth ->
-    //                     auth.requestMatchers("/api/auth/**").permitAll()
-    //                         .requestMatchers("/actuator/**").permitAll()
-    //                         .anyRequest().authenticated()
-    //             );
-    //     return http.build();
-    // }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <-- Add this
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(auth ->
-//                        auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-//                                .requestMatchers("/api/auth/**").permitAll()
-//                                .requestMatchers("/actuator/**").permitAll()
-//                                .anyRequest().authenticated()
-//                );
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+               .authorizeHttpRequests(auth ->
+                       auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                               .requestMatchers("/api/auth/**").permitAll()
+                               .requestMatchers("/actuator/**").permitAll()
+                               .anyRequest().authenticated()
+               );
+                // .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
     }
 
@@ -68,7 +55,7 @@ public class WebSecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",
-                "http://192.168.49.2:31000", // Your NodePort IP
+                "http://192.168.49.2:31000", 
                 "http://frontend-service.auction-system.svc.cluster.local"
         ));
         config.setAllowedMethods(Arrays.asList("*"));
