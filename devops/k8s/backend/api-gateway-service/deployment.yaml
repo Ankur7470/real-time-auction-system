@@ -24,7 +24,9 @@ spec:
       - name: api-gateway
         image: ankur2k19/api-gateway:latest
         imagePullPolicy: Always
-        ports: [{ containerPort: 8000, name: http }]
+        ports: 
+        - containerPort: 8000
+          name: http
         env:
         - name: EUREKA_SERVER_URI
           value: http://eureka-server:8761/eureka/

@@ -1,46 +1,67 @@
 apiVersion: apps/v1
 kind: StatefulSet
-metadata: { name: mysql-bidding, namespace: auction-system }
+metadata:
+  name: mysql-bidding
+  namespace: auction-system
 spec:
   serviceName: mysql-bidding-svc
   replicas: 1
-  selector: { matchLabels: { app: mysql-bidding } }
+  selector:
+    matchLabels:
+      app: mysql-bidding
   template:
-    metadata: { labels: { app: mysql-bidding } }
+    metadata:
+      labels:
+        app: mysql-bidding
     spec:
       containers:
-      - name: mysql-bidding
-        image: mysql:5.7
-        env:
-        - name: MYSQL_DATABASE    
-          value: auction_bidding_db
-        - name: MYSQL_USER        
-          valueFrom:
-            secretKeyRef: { name: bidding-service-secrets, key: datasource-username }
-        - name: MYSQL_PASSWORD    
-          valueFrom:
-            secretKeyRef: { name: bidding-service-secrets, key: datasource-password }
-        - name: MYSQL_ROOT_PASSWORD 
-          value: rootpass
-        ports: [{ containerPort: 3306, name: mysql }]
-        volumeMounts: [{ name: mysql-data, mountPath: /var/lib/mysql }]
-
-        readinessProbe:
-          tcpSocket:
-            port: 3306
-          initialDelaySeconds: 10
-          periodSeconds: 5
-
-          
+        - name: mysql-bidding
+          image: mysql:5.7
+          env:
+            - name: MYSQL_DATABASE
+              value: auction_bidding_db
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: bidding-service-secrets
+                  key: datasource-username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bidding-service-secrets
+                  key: datasource-password
+            - name: MYSQL_ROOT_PASSWORD
+              value: rootpass
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 10
+            periodSeconds: 5
   volumeClaimTemplates:
-  - metadata: { name: mysql-data }
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources: { requests: { storage: 1Gi } }
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
-metadata: { name: mysql-bidding-svc, namespace: auction-system }
+metadata:
+  name: mysql-bidding-svc
+  namespace: auction-system
 spec:
-  selector: { app: mysql-bidding }
-  ports: [{ port: 3306, targetPort: 3306, name: mysql }]
+  selector:
+    app: mysql-bidding
+  ports:
+    - port: 3306
+      targetPort: 3306
+      name: mysql

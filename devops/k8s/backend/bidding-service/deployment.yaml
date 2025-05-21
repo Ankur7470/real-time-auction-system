@@ -33,6 +33,8 @@ spec:
           - containerPort: 8084
             name: http
         env:
+          - name: EUREKA_SERVER_URI
+            value: http://eureka-server:8761/eureka/
           - name: SPRING_DATASOURCE_URL
             valueFrom:
               secretKeyRef:

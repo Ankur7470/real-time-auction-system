@@ -39,7 +39,7 @@
             namespace: "{{ namespace }}"
           type: Opaque
           stringData:
-            datasource-url: "jdbc:mysql://mysql-auth-svc:3306/auction_auth_db"
+            datasource-url: "jdbc:mysql://mysql-auth-svc:3306/auction_auth_db?createDatabaseIfNotExist=true"
             datasource-username: "{{ vault_auth_db_user }}"
             datasource-password: "{{ vault_auth_db_pass }}"
             jwt-secret: "{{ vault_jwt_secret }}"
@@ -55,7 +55,7 @@
             namespace: "{{ namespace }}"
           type: Opaque
           stringData:
-            datasource-url: "jdbc:mysql://mysql-auction-svc:3306/auction_db"
+            datasource-url: "jdbc:mysql://mysql-auction-svc:3306/auction_db?createDatabaseIfNotExist=true"
             datasource-username: "{{ vault_auction_db_user }}"
             datasource-password: "{{ vault_auction_db_pass }}"
 
@@ -70,7 +70,7 @@
             namespace: "{{ namespace }}"
           type: Opaque
           stringData:
-            datasource-url: "jdbc:mysql://mysql-bidding-svc:3306/auction_bidding_db"
+            datasource-url: "jdbc:mysql://mysql-bidding-svc:3306/auction_bidding_db?createDatabaseIfNotExist=true"
             datasource-username: "{{ vault_bidding_db_user }}"
             datasource-password: "{{ vault_bidding_db_pass }}"
 
