@@ -15,9 +15,9 @@ export const WebSocketProvider = ({ children }) => {
       const socket = new SockJS(`/ws-auction?token=${localStorage.getItem("token")}`);
       stompClient.current = new Client({
         webSocketFactory: () => socket,
-        connectHeaders: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
+        // connectHeaders: {
+        //   Authorization: `Bearer ${localStorage.getItem('token')}`
+        // },
         onConnect: () => {
           console.log('WebSocket connected');
         },
