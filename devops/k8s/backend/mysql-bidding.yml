@@ -24,6 +24,13 @@ spec:
           value: rootpass
         ports: [{ containerPort: 3306, name: mysql }]
         volumeMounts: [{ name: mysql-data, mountPath: /var/lib/mysql }]
+
+        readinessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
           
   volumeClaimTemplates:
   - metadata: { name: mysql-data }

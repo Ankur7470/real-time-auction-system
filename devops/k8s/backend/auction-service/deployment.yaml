@@ -25,7 +25,7 @@ spec:
         command:
           - sh
           - -c
-          - until nc -z mysql-auction-svc 3306; do echo "Waiting for DB"; sleep 2; done
+          - until nc -z mysql-auction-0.mysql-auction-svc 3306; do echo "Waiting for DB"; sleep 2; done
       containers:
       - name: auction-service
         image: ankur2k19/auction-service:latest

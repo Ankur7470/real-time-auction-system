@@ -25,7 +25,7 @@ spec:
         command:
           - sh
           - -c
-          - until nc -z mysql-bidding-svc 3306; do echo "Waiting for DB"; sleep 2; done
+          - until nc -z mysql-bidding-0.myqsl-bidding-svc 3306; do echo "Waiting for DB"; sleep 2; done
       containers:
       - name: bidding-service
         image: ankur2k19/bidding-service:latest

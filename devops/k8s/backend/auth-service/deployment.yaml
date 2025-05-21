@@ -25,7 +25,7 @@ spec:
         command:
           - sh
           - -c
-          - until nc -z mysql-auth-svc 3306; do echo "Waiting for DB"; sleep 2; done
+          - until nc -z mysql-auth-0.mysql-auth-svc 3306; do echo "Waiting for DB"; sleep 2; done
       containers:
       - name: auth-service
         image: ankur2k19/auth-service:latest
