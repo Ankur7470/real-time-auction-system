@@ -1,33 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
-    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>logstash.elk.svc.cluster.local:5000</destination>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp>
-                    <timeZone>UTC</timeZone>
-                </timestamp>
-                <pattern>
-                    <pattern>
-                        {
-                            "timestamp": "%date",
-                            "level": "%level",
-                            "thread": "%thread",
-                            "logger": "%logger",
-                            "message": "%message",
-                            "application": "auth-service",
-                            "trace": "%X{X-B3-TraceId}",
-                            "span": "%X{X-B3-SpanId}"
-                        }
-                    </pattern>
-                </pattern>
-            </providers>
-        </encoder>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
+
