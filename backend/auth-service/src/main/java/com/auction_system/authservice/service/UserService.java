@@ -1,6 +1,6 @@
 package com.auction_system.authservice.service;
 
-import com.auction_system.authservice.model.User;
+// import com.auction_system.authservice.model.User;
 import com.auction_system.authservice.payload.UserDto;
 import com.auction_system.authservice.repo.UserRepo;
 import lombok.extern.slf4j.Slf4j;
