@@ -1,35 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
 
-    <!-- Console appender -->
-    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+<configuration>
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>logstash.elk.svc.cluster.local:5000</destination>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <pattern>
+                    <pattern>
+                        {
+                            "timestamp": "%date",
+                            "level": "%level",
+                            "thread": "%thread",
+                            "logger": "%logger",
+                            "message": "%message",
+                            "application": "api-gateway",
+                            "trace": "%X{X-B3-TraceId}",
+                            "span": "%X{X-B3-SpanId}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
         </encoder>
     </appender>
 
-    <!-- Logstash encoder (optional if you want JSON output for ELK stack etc.) -->
-    <!--
-    <appender name="Logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5000</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-    </appender>
-    -->
-
-    <!-- Root logger -->
     <root level="INFO">
-        <appender-ref ref="Console" />
-        <!-- <appender-ref ref="Logstash" /> -->
+        <appender-ref ref="LOGSTASH"/>
     </root>
-
-    <!-- Enable debug logging for your application -->
-    <logger name="com.auction_system" level="DEBUG" />
-
-    <!-- Spring Boot Actuator logging -->
-    <logger name="org.springframework.boot.actuate" level="INFO" />
-
-    <!-- Optionally you can add logging for Eureka or Feign clients -->
-    <logger name="com.netflix.discovery" level="INFO" />
-    <logger name="feign" level="DEBUG" />
-
 </configuration>
