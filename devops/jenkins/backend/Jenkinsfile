@@ -58,22 +58,6 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def services = ['eureka-server', 'api-gateway', 'auth-service', 'auction-service', 'bidding-service']
-                    for (service in services) {
-                        dir("backend/${service}") {
-                            withSonarQubeEnv('SonarQubeServer') {
-                                sh "mvn sonar:sonar -Dsonar.projectKey=${service} -Dsonar.skipTests=true"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
         stage('Build and Push Docker Images') {
             steps {
                 script {

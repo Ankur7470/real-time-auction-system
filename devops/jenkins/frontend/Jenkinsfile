@@ -7,6 +7,7 @@ pipeline {
         DOCKER_IMAGE_TAG = 'latest'
         GITHUB_REPO_URL = 'https://github.com/Ankur7470/real-time-auction-system.git'
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
+        SONAR_TOKEN = credentials('SONAR_FRONT')
     }
 
     triggers {
@@ -53,9 +54,16 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 dir('frontend') {
-                    withSonarQubeEnv('SonarQubeServer') {
-                        sh "${tool 'SonarQubeScanner'}/bin/sonar-scanner"
-                    }
+                    sh """
+                        npm install @sonar/scan --save-dev
+                        npm install
+
+                        npx sonar \
+                              -Dsonar.projectKey=ankur7470_real-time-auction-frontend \
+                              -Dsonar.organization=ankur7470 \
+                              -Dsonar.host.url=https://sonarcloud.io \
+                              -Dsonar.login=$SONAR_FRONT
+                    """
                 }
             }
         }
