@@ -13,10 +13,6 @@ pipeline {
         githubPush()
     }
 
-    tools {
-        sonarScanner 'SonarQubeScanner'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -59,7 +55,6 @@ pipeline {
                 dir('frontend') {
                     withSonarQubeEnv('SonarQubeServer') {
                         sh "${tool 'SonarQubeScanner'}/bin/sonar-scanner"
-                        // sh 'sonar-scanner'
                     }
                 }
             }

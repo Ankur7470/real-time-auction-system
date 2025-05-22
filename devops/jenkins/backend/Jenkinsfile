@@ -13,9 +13,10 @@ pipeline {
     }
 
     tools {
-        maven 'Maven 3.9.9'
-        sonarScanner 'SonarQubeScanner'  
+    	maven 'Maven 3.9.9'
+    	sonar 'SonarQubeScanner'  
     }
+
 
     stages {
         stage('Checkout') {
