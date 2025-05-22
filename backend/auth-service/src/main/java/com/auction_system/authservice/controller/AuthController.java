@@ -21,6 +21,7 @@ public class AuthController {
 
     @GetMapping("/test")
     public ResponseEntity<?> test() {
+        log.info("Health check endpoint hit");
         return ResponseEntity.ok("Hello World");
     }
 
@@ -34,26 +35,17 @@ public class AuthController {
         return authService.registerUser(signUpRequest);
     }
 
-@GetMapping("/verify")
-public ResponseEntity<?> verifyToken(@RequestHeader("Authorization") String authHeader) {
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header");
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyToken(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.warn("Invalid or missing Authorization header");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header");
+        }
+
+        String token = authHeader.substring(7);
+        log.info("Token verification requested");
+        return ResponseEntity.ok(authService.verifyUser(token));
     }
 
-    String token = authHeader.substring(7);
-
-     return ResponseEntity.ok(authService.verifyUser(token));
-}
-//
-//    @GetMapping("/getUser")
-//    public ResponseEntity<?> getUser(String token) {
-////        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-////            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header");
-////        }
-//
-////        String token = authHeader.substring(7);
-//
-//        return authService.getUser(token);
-//    }
 }
 

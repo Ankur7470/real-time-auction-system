@@ -3,43 +3,32 @@ package com.auction_system.authservice.service;
 import com.auction_system.authservice.model.User;
 import com.auction_system.authservice.payload.UserDto;
 import com.auction_system.authservice.repo.UserRepo;
-import com.auction_system.authservice.security.services.UserDetailsImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class UserService {
 
     @Autowired
-    UserRepo userRepo;
+    private UserRepo userRepo;
 
     public UserDto getUserById(Long id) {
+        log.debug("Searching for user with ID: {}", id);
 
-        User user = userRepo.findById(id).orElse(null);
-        assert user != null;
-        return new UserDto(
-                user.getId(),
-                user.getEmail(),
-                user.getUsername()
-        );
+        return userRepo.findById(id)
+                .map(user -> {
+                    log.debug("User found with ID: {}", id);
+                    return new UserDto(
+                            user.getId(),
+                            user.getEmail(),
+                            user.getUsername()
+                    );
+                })
+                .orElseThrow(() -> {
+                    log.warn("User not found with ID: {}", id);
+                    return new RuntimeException("User not found");
+                });
     }
-
-//        public User getAuthenticatedUser() {
-//
-//
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication == null || !authentication.isAuthenticated()) {
-//            throw new RuntimeException("Not authenticated");
-//        }
-//
-//        // Get user details from authentication object
-//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//
-//        // Return the user entity from database
-//        return userRepo.findByUsername(userDetails.getUsername())
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//    }
 }

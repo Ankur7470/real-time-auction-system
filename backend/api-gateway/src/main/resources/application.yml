@@ -54,3 +54,4 @@ logging:
   level:
     com.auction_system: DEBUG
     org.springframework.boot.actuate: INFO
+

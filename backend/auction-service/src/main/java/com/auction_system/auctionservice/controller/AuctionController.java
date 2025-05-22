@@ -2,10 +2,9 @@ package com.auction_system.auctionservice.controller;
 
 import com.auction_system.auctionservice.dto.AuctionDto;
 import com.auction_system.auctionservice.dto.BidRequest;
-import com.auction_system.auctionservice.model.Auction;
 import com.auction_system.auctionservice.service.AuctionService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
+// import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auctions")
-@Slf4j
+// @Slf4j
 public class AuctionController {
 
     @Autowired
@@ -25,13 +23,11 @@ public class AuctionController {
 
     @GetMapping
     public ResponseEntity<List<AuctionDto>> getAllAuctions() {
-        log.info("Fetching all active auctions");
         return ResponseEntity.ok(auctionService.getAllActiveAuctions());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AuctionDto> getAuctionById(@PathVariable Long id) {
-        log.info("Fetching auction with id: {}", id);
         return ResponseEntity.ok(auctionService.getAuctionById(id));
     }
 
@@ -40,7 +36,6 @@ public class AuctionController {
     public ResponseEntity<AuctionDto> createAuction(
             @Valid @RequestBody AuctionDto auctionDTO,
             @RequestHeader(value = "X-User-ID") Long userId) {
-        log.info("Creating new auction: {}", auctionDTO.getTitle());
         AuctionDto createdAuction = auctionService.createAuction(auctionDTO, userId);
         return new ResponseEntity<>(createdAuction, HttpStatus.CREATED);
     }
@@ -50,7 +45,6 @@ public class AuctionController {
             @PathVariable Long id,
             @Valid @RequestBody AuctionDto auctionDTO,
             @RequestHeader("X-User-ID") Long userId) {
-        log.info("Updating auction with id: {}", id);
         return ResponseEntity.ok(auctionService.updateAuction(id, auctionDTO, userId));
     }
 
@@ -58,7 +52,6 @@ public class AuctionController {
     public ResponseEntity<Void> deleteAuction(
             @PathVariable Long id,
             @RequestHeader("X-User-ID") Long userId) {
-        log.info("Deleting auction with id: {}", id);
         auctionService.deleteAuction(id, userId);
         return ResponseEntity.noContent().build();
     }
@@ -70,13 +63,11 @@ public class AuctionController {
 
     @GetMapping("/seller/{sellerId}")
     public ResponseEntity<List<AuctionDto>> getAuctionsBySeller(@PathVariable Long sellerId) {
-        log.info("Fetching auctions for seller with id: {}", sellerId);
         return ResponseEntity.ok(auctionService.getAuctionsBySeller(sellerId));
     }
 
     @GetMapping("/winner/{winnerId}")
     public ResponseEntity<List<AuctionDto>> getAuctionsByWinner(@PathVariable Long winnerId) {
-        log.info("Fetching auctions won by user with id: {}", winnerId);
         return ResponseEntity.ok(auctionService.getAuctionsByWinner(winnerId));
     }
 

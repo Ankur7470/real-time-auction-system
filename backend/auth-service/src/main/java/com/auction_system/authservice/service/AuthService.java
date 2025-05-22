@@ -9,7 +9,6 @@ import com.auction_system.authservice.payload.response.LoginResponse;
 import com.auction_system.authservice.payload.response.MessageResponse;
 import com.auction_system.authservice.repo.RoleRepo;
 import com.auction_system.authservice.repo.UserRepo;
-//import com.auction_system.authservice.security.jwt.JwtHelper;
 import com.auction_system.authservice.security.jwt.JwtUtils;
 import com.auction_system.authservice.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class AuthService {
 
     @Autowired
@@ -45,59 +45,74 @@ public class AuthService {
     JwtUtils jwtHelper;
 
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
+        log.debug("Authenticating user: {}", loginRequest.getUsername());
+
+        try {
+            Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        String jwt = jwtHelper.generateJwtToken(authentication);
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            String jwt = jwtHelper.generateJwtToken(authentication);
 
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new LoginResponse(
-                jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+            log.info("User '{}' authenticated successfully with roles: {}", loginRequest.getUsername(), roles);
+
+            return ResponseEntity.ok(new LoginResponse(
+                    jwt,
+                    userDetails.getId(),
+                    userDetails.getUsername(),
+                    userDetails.getEmail(),
+                    roles));
+        } catch (Exception e) {
+            log.error("Login failed for user '{}': {}", loginRequest.getUsername(), e.getMessage());
+            return ResponseEntity.status(401).body(new MessageResponse("Invalid username or password"));
+        }
     }
 
     public ResponseEntity<?> registerUser(SignupRequest signupRequest) {
+        log.debug("Registering user: {}", signupRequest.getUsername());
 
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
+            log.warn("Username '{}' is already taken", signupRequest.getUsername());
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
+            log.warn("Email '{}' is already in use", signupRequest.getEmail());
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Create new user's account
-        User user = new User(signupRequest.getUsername(), signupRequest.getEmail(),
-                encoder.encode(signupRequest.getPassword()));
+        try {
+            User user = new User(signupRequest.getUsername(), signupRequest.getEmail(),
+                    encoder.encode(signupRequest.getPassword()));
 
-        Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        roles.add(userRole);
+            Set<Role> roles = new HashSet<>();
+            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
 
-        user.setRoles(roles);
-        userRepository.save(user);
+            user.setRoles(roles);
+            userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+            log.info("User '{}' registered successfully", signupRequest.getUsername());
+            return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        } catch (Exception e) {
+            log.error("Registration failed for user '{}': {}", signupRequest.getUsername(), e.getMessage());
+            return ResponseEntity.status(500).body(new MessageResponse("Registration failed. Please try again."));
+        }
     }
 
-//    public boolean validateToken(String token) {
-//        return jwtHelper.validateJwtToken(token);
-//    }
-
     public ResponseEntity<?> verifyUser(String token) {
+        log.debug("Verifying token");
 
         try {
             if (!jwtHelper.validateJwtToken(token)) {
+                log.warn("Invalid token received");
                 return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid token"));
             }
 
@@ -105,24 +120,11 @@ public class AuthService {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            log.info("Token valid. User '{}' verified", username);
             return ResponseEntity.ok(user);
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid token"));
-        }
-    }
-
-
-    public ResponseEntity<?> getUser(String token) {
-        try {
-            if (!jwtHelper.validateJwtToken(token)) {
-                return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid token"));
-            }
-
-            String username = jwtHelper.getUserNameFromJwtToken(token);
-            return ResponseEntity.ok(username);
-
-        } catch (Exception e) {
+            log.error("Token verification failed: {}", e.getMessage());
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid token"));
         }
     }

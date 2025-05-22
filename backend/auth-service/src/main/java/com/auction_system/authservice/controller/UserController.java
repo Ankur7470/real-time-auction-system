@@ -17,7 +17,17 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        log.info("Fetching user with id: {}", id);
-        return ResponseEntity.ok(userService.getUserById(id));
+        log.info("Received request to fetch user with ID: {}", id);
+        try {
+            UserDto userDto = userService.getUserById(id);
+            log.info("Successfully fetched user with ID: {}", id);
+            return ResponseEntity.ok(userDto);
+        } catch (RuntimeException e) {
+            log.error("Failed to fetch user with ID: {}. Reason: {}", id, e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while fetching user with ID: {}", id, e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
