@@ -1,0 +1,48 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.auction_system</groupId>
+    <artifactId>real-time-auction-system</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>real-time-auction-system</name>
+    <description>Monorepo for backend services of real-time auction system</description>
+
+    <!-- SonarCloud Configuration -->
+    <properties>
+        <sonar.organization>ankur7470</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source> <!-- Adjust Java version -->
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <!-- Modules (Subprojects) -->
+    <modules>
+        <module>eureka-server</module>
+         <module>auction-service</module>
+        <module>auth-service</module>
+       
+        <module>bidding-service</module>
+        <module>api-gateway</module>
+    </modules>
+
+    <!-- Sonar Maven Plugin (Optional direct plugin usage) -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.9.1.2184</version> <!-- Use latest stable version -->
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

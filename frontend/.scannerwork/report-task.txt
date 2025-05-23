@@ -1,7 +1,0 @@
-organization=ankur7470
-projectKey=ankur7470_real-time-auction-system-frontend
-serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.63733
-dashboardUrl=https://sonarcloud.io/dashboard?id=ankur7470_real-time-auction-system-frontend
-ceTaskId=AZb5t_CusdHqaUmNKKew
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZb5t_CusdHqaUmNKKew
