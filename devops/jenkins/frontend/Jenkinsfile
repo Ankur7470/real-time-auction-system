@@ -62,7 +62,7 @@ pipeline {
                               -Dsonar.projectKey=ankur7470_real-time-auction-frontend \
                               -Dsonar.organization=ankur7470 \
                               -Dsonar.host.url=https://sonarcloud.io \
-                              -Dsonar.login=$SONAR_FRONT
+                              -Dsonar.login=$SONAR_TOKEN
                     """
                 }
             }
