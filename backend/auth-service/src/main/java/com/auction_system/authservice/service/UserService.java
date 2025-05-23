@@ -1,6 +1,5 @@
 package com.auction_system.authservice.service;
 
-// import com.auction_system.authservice.model.User;
 import com.auction_system.authservice.payload.UserDto;
 import com.auction_system.authservice.repo.UserRepo;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,6 @@ public class UserService {
 
     public UserDto getUserById(Long id) {
         log.debug("Searching for user with ID: {}", id);
-
         return userRepo.findById(id)
                 .map(user -> {
                     log.debug("User found with ID: {}", id);

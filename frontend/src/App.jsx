@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Register from './pages/Register';
+import EditAuction from './pages/EditAuction';
 //import ErrorBoundary from './components/ErrorBoundary';
 
 const theme = createTheme({
@@ -35,6 +36,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path="create-auction" element={<CreateAuction />} />
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="auctions/:id/edit" element={<EditAuction />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Route>

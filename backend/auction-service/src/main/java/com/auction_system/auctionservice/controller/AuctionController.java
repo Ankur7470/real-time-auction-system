@@ -77,7 +77,6 @@ public ResponseEntity<AuctionDto> placeBid(
         @RequestBody BidRequest request, // Create dedicated request DTO
         @RequestHeader("X-User-ID") Long userId) {
 
-
         AuctionDto updatedAuction = auctionService.updateBid(
                 id,
                 request.getAmount(),

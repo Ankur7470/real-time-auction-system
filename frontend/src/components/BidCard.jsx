@@ -38,11 +38,10 @@ const BidCard = ({ bid }) => {
           <h3 className="text-lg font-semibold text-gray-800 truncate">
             {auction.title}
           </h3>
-          <span className={`text-xs px-2 py-1 rounded-full ${
-            auction.status === 'ACTIVE' 
-              ? 'bg-green-100 text-green-800' 
+          <span className={`text-xs px-2 py-1 rounded-full ${auction.status === 'ACTIVE'
+              ? 'bg-green-100 text-green-800'
               : 'bg-gray-100 text-gray-800'
-          }`}>
+            }`}>
             {auction.status}
           </span>
         </div>

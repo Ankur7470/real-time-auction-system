@@ -4,19 +4,7 @@ import { toast } from 'react-toastify';
 import { FaImage, FaTag, FaAlignLeft, FaDollarSign, FaClock, FaList } from 'react-icons/fa';
 import moment from 'moment';
 import api from '../services/axiosConfig';
-
-const categories = [
-  'Electronics',
-  'Clothing',
-  'Home & Garden',
-  'Toys & Games',
-  'Sports',
-  'Collectibles',
-  'Vehicles',
-  'Jewelry',
-  'Art',
-  'Other',
-];
+import { categories } from '../constants/categories.js';
 
 const CreateAuction = () => {
 

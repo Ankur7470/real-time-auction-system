@@ -52,6 +52,18 @@ const Dashboard = () => {
     fetchData();
   }, [currentUser]);
 
+  const handleDelete = async (auctionId) => {
+    if (confirm('Are you sure you want to delete this auction?')) {
+      try {
+        await api.delete(`/auctions/${auctionId}`);
+        setUserAuctions(prev => prev.filter(a => a.id !== auctionId));
+        toast.success('Auction deleted successfully');
+      } catch {
+        toast.error('Failed to delete auction');
+      }
+    }
+  };
+
   const tabs = [
     { name: 'My Auctions', count: userAuctions.length, data: userAuctions, type: 'auction' },
     { name: 'My Bids', count: userBids.length, data: userBids, type: 'bid' },
@@ -84,8 +96,8 @@ const Dashboard = () => {
             <button
               key={tab.name}
               className={`flex-1 py-4 px-4 text-center font-medium ${activeTab === index
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-gray-500 hover:text-gray-700'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-gray-500 hover:text-gray-700'
                 }`}
               onClick={() => setActiveTab(index)}
             >
@@ -122,7 +134,7 @@ const Dashboard = () => {
                 {currentTab.type === 'bid' ? (
                   <BidCard bid={item} />
                 ) : (
-                  <AuctionCard auction={item.auction || item} />
+                  <AuctionCard auction={item.auction || item} onDelete={handleDelete} />
                 )}
               </div>
             );

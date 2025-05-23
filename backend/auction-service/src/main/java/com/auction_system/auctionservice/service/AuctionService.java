@@ -202,7 +202,7 @@ public class AuctionService {
     }
 
     private AuctionDto convertToDTO(Auction auction) {
-        log.debug("Converting Auction entity to DTO for id: {}", auction.getId());
+//        log.debug("Converting Auction entity to DTO for id: {}", auction.getId());
         AuctionDto dto = new AuctionDto();
         dto.setId(auction.getId());
         dto.setTitle(auction.getTitle());
@@ -242,7 +242,7 @@ public class AuctionService {
     }
 
     private Auction convertToAuction(AuctionDto dto) {
-        log.debug("Converting DTO to Auction entity for id: {}", dto.getId());
+//        log.debug("Converting DTO to Auction entity for id: {}", dto.getId());
         Auction auction = new Auction();
         auction.setId(dto.getId());
         auction.setTitle(dto.getTitle());
@@ -260,7 +260,7 @@ public class AuctionService {
         if (dto.getSeller() != null) {
             auction.setSellerId(dto.getSeller().getId());
         } else {
-            log.warn("Auction DTO has no seller info. Throwing exception.");
+//            log.warn("Auction DTO has no seller info. Throwing exception.");
             throw new IllegalArgumentException("Seller information is required");
         }
 
